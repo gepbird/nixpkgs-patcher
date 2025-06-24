@@ -525,7 +525,8 @@ However, if you want to patch other flake inputs or use patches inside packages 
 | No extra eval time for local patching (cached)                              | ❌ | ✅ | ❌ |
 | Doesn't require additional tools                                            | ✅ | ❌ | ✅ |
 | Automatic `system` detection                                                | ✅ | ✅ | ❌ |
-| Works for any flake                                                         | ❌ | ✅ | ✅ |
+| Works for any flake on GitHub                                               | ❌ | ✅ | ✅ |
+| Works for any flake                                                         | ❌ | ❌ | ✅ |
 | [IFD](https://nix.dev/manual/nix/2.29/language/import-from-derivation) free | ❌ | ✅ | ❌ |
 
 ### Why Not Just Use Overlays?
