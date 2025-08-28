@@ -2,15 +2,14 @@
   "nodes": {
     "nixpkgs-patcher": {
       "locked": {
-        "lastModified": 0,
-        "narHash": "sha256-jKuajNzk3+3NRLJMnJjfKBp84Lr23X/K+JIw6c5Jmp0=",
         "path": "../..",
         "type": "path"
       },
       "original": {
         "path": "../..",
         "type": "path"
-      }
+      },
+      "parent": []
     },
     "nixpkgs-unstable": {
       "locked": {
@@ -43,15 +42,14 @@
     "osu-nix-pr-20-607-0": {
       "flake": false,
       "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-s1zF7cMOuME+oBIU4BwsVjafOPtB6Ujubgbo+O/6SCE=",
         "path": "./osu-nix-pr-20-607-0.diff",
         "type": "path"
       },
       "original": {
         "path": "./osu-nix-pr-20-607-0.diff",
         "type": "path"
-      }
+      },
+      "parent": []
     },
     "root": {
       "inputs": {

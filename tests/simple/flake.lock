@@ -30,15 +30,14 @@
     },
     "nixpkgs-patcher": {
       "locked": {
-        "lastModified": 0,
-        "narHash": "sha256-IBptYmNW7kvinXcDJ8nD//7/ov3VavC+NDvI0SyWh0k=",
         "path": "../..",
         "type": "path"
       },
       "original": {
         "path": "../..",
         "type": "path"
-      }
+      },
+      "parent": []
     },
     "root": {
       "inputs": {

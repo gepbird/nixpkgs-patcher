@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/3d79cbf3caec8f7482ad176f63701168b66e08a3";
-    nixpkgs-patcher.url = "path:../..";
+    nixpkgs-patcher.url = "../..";
     osu-nix-pr-10-605-3 = {
       url = "https://github.com/NixOS/nixpkgs/compare/pull/414172/head~2...pull/414172/head.diff";
       flake = false;
