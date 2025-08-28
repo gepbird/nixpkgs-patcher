@@ -1,0 +1,52 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1752600023,
+        "narHash": "sha256-7TY7u5A9+sMAzxD8U48YJTl/Uk9ilyh2G8649OpJzN8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "44edb9645db4dd80fcdc0a060f28580d7b1f6bd2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "44edb9645db4dd80fcdc0a060f28580d7b1f6bd2",
+        "type": "github"
+      }
+    },
+    "nixpkgs-patch-msmtp-build-fix-1-8-30": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-XDEWDedRqnc5pN6Rg68d9aTumHpj3HmnUN2wrheS6p0=",
+        "type": "file",
+        "url": "https://github.com/NixOS/nixpkgs/pull/425312.diff"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/NixOS/nixpkgs/pull/425312.diff"
+      }
+    },
+    "nixpkgs-patcher": {
+      "locked": {
+        "path": "../..",
+        "type": "path"
+      },
+      "original": {
+        "path": "../..",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "nixpkgs-patch-msmtp-build-fix-1-8-30": "nixpkgs-patch-msmtp-build-fix-1-8-30",
+        "nixpkgs-patcher": "nixpkgs-patcher"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
