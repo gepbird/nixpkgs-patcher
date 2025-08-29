@@ -41,10 +41,10 @@
           patchInputRegex = ".*nix-pr.*";
           patches =
             pkgs: with pkgs; [
-              (fetchpatch2 {
+              (fetchurl {
                 name = "glance-environment-file.diff";
                 url = "https://github.com/gepbird/nixpkgs/commit/3bddd16a376b1e7360395ccc4ca1d702644513ce.diff";
-                hash = "sha256-QURZbwS/3P7iwSiVezPPFEzbRTbT/1fH7dHSdjEU+ok=";
+                hash = "sha256-Wb70ETLv3j3MBPV3sXOnENxMf9d1uC/cbQLNOhDtMKU=";
               })
             ];
         };

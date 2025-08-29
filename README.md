@@ -150,12 +150,12 @@ You can also define patches similarly to how you configured this flake. Provide 
         # ...
         nixpkgsPatcher.patches =
           pkgs: with pkgs; [
-            (fetchpatch2 {
+            (fetchurl {
               name = "git-review-bump.patch";
               url = "https://github.com/NixOS/nixpkgs/pull/410328.diff";
               hash = ""; # rebuild, wait for nix to fail and give you the hash, then put it here
             })
-            (fetchpatch2 {
+            (fetchurl {
               # ...
             })
           ];
@@ -180,7 +180,7 @@ After installing nixpkgs-patcher, you can apply patches from your config without
   nixpkgs-patcher = {
     enable = true;
     settings.patches = with pkgs; [
-      (fetchpatch2 {
+      (fetchurl {
         name = "git-review-bump.patch";
         url = "https://github.com/NixOS/nixpkgs/pull/410328.diff";
         hash = ""; # rebuild, wait for nix to fail and give you the hash, then put it here
@@ -268,6 +268,9 @@ To be extra sure you can use download the patch and reference to it by a local p
 
 > [!NOTE]  
 > Using URLs like `https://github.com/NixOS/nixpkgs/pull/410328.diff` is shorter and more convenient, but a few months ago this was heavily rate limited. If you run into such errors, you can use other formats mentioned above. 
+
+> [!NOTE]  
+> If you are using `fetchpatch`, `fetchpatch2` (or anything that uses `filterdiff` under the hood) instead of `fetchurl`, patching can fail if the only change to any files in the patch is a rename.
 
 ## Troubleshooting
 
@@ -535,7 +538,7 @@ However, if you want to patch other flake inputs or use patches inside packages 
 |------------------------------                                               |----|----|----|
 | Patches defined as [flake inputs](#using-flake-inputs)                      | ✅ | ✅ | ❌ |
 | Patches defined in [your NixOS configuration](#using-your-configuration)    | ✅ | ❌ | ❌ |
-| Patches using [fetchpatch](#using-your-configuration)                       | ✅ | ❌ | ✅ |
+| Patches using [fetchurl](#using-your-configuration)                         | ✅ | ❌ | ✅ |
 | Local only                                                                  | ✅ | ❌ | ✅ |
 | No extra eval time spent with locally applying patches (cached)             | ❌ | ✅ | ❌ |
 | Doesn't require additional tools                                            | ✅ | ❌ | ✅ |

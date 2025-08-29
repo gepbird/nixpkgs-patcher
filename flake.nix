@@ -54,7 +54,7 @@
                       default = [ ];
                       example = literalExpression ''
                         [
-                          (pkgs.fetchpatch2 {
+                          (pkgs.fetchurl {
                             name = "foo-module-init.patch";
                             url = "https://github.com/NixOS/nixpkgs/compare/pull/123456/head~1...pull/123456/head.patch";
                             hash = "";
