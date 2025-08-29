@@ -2,10 +2,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/44edb9645db4dd80fcdc0a060f28580d7b1f6bd2";
     nixpkgs-patcher.url = "path:../..";
-    nixpkgs-patch-msmtp-build-fix-1-8-30 = {
-      url = "https://github.com/NixOS/nixpkgs/pull/425312.diff";
-      flake = false;
-    };
   };
 
   outputs =
@@ -16,6 +12,16 @@
           ./hardware-configuration.nix
         ];
         specialArgs = inputs;
+        nixpkgsPatcher.patches = pkgs: [
+          # this test is known to be failing
+          # https://github.com/gepbird/nixpkgs-patcher/issues/3
+          # https://github.com/twaugh/patchutils/issues/109
+          (pkgs.fetchpatch2 {
+            name = "msmtp-build-fix-1-8-30.diff";
+            url = "https://github.com/NixOS/nixpkgs/pull/425312.diff";
+            hash = "sha256-4YpIJ+ZrxEE/5jzKqOaaGWLoDlIG71xheXXu+mOG7vQ=";
+          })
+        ];
       };
 
       nixosConfigurations.unpatched = nixpkgs.lib.nixosSystem {

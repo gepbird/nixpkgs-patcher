@@ -16,18 +16,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-patch-msmtp-build-fix-1-8-30": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-XDEWDedRqnc5pN6Rg68d9aTumHpj3HmnUN2wrheS6p0=",
-        "type": "file",
-        "url": "https://github.com/NixOS/nixpkgs/pull/425312.diff"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://github.com/NixOS/nixpkgs/pull/425312.diff"
-      }
-    },
     "nixpkgs-patcher": {
       "locked": {
         "path": "../..",
@@ -42,7 +30,6 @@
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "nixpkgs-patch-msmtp-build-fix-1-8-30": "nixpkgs-patch-msmtp-build-fix-1-8-30",
         "nixpkgs-patcher": "nixpkgs-patcher"
       }
     }
