@@ -81,18 +81,17 @@
             _module.check = false;
           };
 
-        args' =
-          {
-            system = null;
-            modules = args.modules ++ [
-              metadataModule
-              nixpkgsPatcherNixosModule
-            ];
-          }
-          // removeAttrs args [
-            "modules"
-            "nixpkgsPatcher"
+        args' = {
+          system = null;
+          modules = args.modules ++ [
+            metadataModule
+            nixpkgsPatcherNixosModule
           ];
+        }
+        // removeAttrs args [
+          "modules"
+          "nixpkgsPatcher"
+        ];
 
         config = args.nixpkgsPatcher or { };
         inputs =
