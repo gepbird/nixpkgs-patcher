@@ -108,7 +108,9 @@
         };
         evaledModules = import "${nixpkgs}/nixos/lib/eval-config.nix" evalArgs;
         system =
-          if args'.system != null then args'.system else evaledModules.config.nixpkgs.hostPlatform.system;
+          config.system or (
+            if args'.system != null then args'.system else evaledModules.config.nixpkgs.hostPlatform.system
+          );
         pkgs = import nixpkgs { inherit system; };
 
         moduleConfig = evaledModules.config.nixpkgs-patcher;
