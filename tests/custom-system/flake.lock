@@ -1,0 +1,52 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1749307940,
+        "narHash": "sha256-Zo1AH9079axOQpWqLiaUzbL+NT/k4lSCdCwZMvEvLv4=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "dd90a8666b501e6068a1d56fe6f0b1da85ccac06",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "dd90a8666b501e6068a1d56fe6f0b1da85ccac06",
+        "type": "github"
+      }
+    },
+    "nixpkgs-patch-git-review-bump": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-T+beekuqxM6+/EKZVwYmFS2yXnjw1gTl/l7NRjFkirc=",
+        "type": "file",
+        "url": "https://github.com/NixOS/nixpkgs/pull/410328.diff"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/NixOS/nixpkgs/pull/410328.diff"
+      }
+    },
+    "nixpkgs-patcher": {
+      "locked": {
+        "path": "../..",
+        "type": "path"
+      },
+      "original": {
+        "path": "../..",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "nixpkgs-patch-git-review-bump": "nixpkgs-patch-git-review-bump",
+        "nixpkgs-patcher": "nixpkgs-patcher"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

@@ -117,6 +117,33 @@ If you don't want to start every patch's name with `nixpkgs-patch-`, you can cha
 }
 ```
 
+### Using a Different System for Evaluation
+
+For example trying to query the hostname of an aarch64-linux host on an x86_64-linux machine would fail by default, but if you specify `nixpkgsPatcher.system` to be the current machine's system, it works:
+```nix
+# file: flake.nix
+{
+  outputs = 
+  { nixpkgs-patcher, ... }@inputs:
+  {
+    nixosConfigurations.yourHostname = nixpkgs-patcher.lib.nixosSystem {
+      # ...
+      modules = [
+        {
+          nixpkgs.hostPlatform.system = "aarch64-linux";
+          networking.hostName = "yourHostname";
+        }
+      ];
+      nixpkgsPatcher.system = "x86_64-linux";
+    }
+  }
+}
+
+# run `nix eval .#nixosConfigurations.yourHostname.config.networking.hostName` to query the hostname
+```
+
+This can be useful when using [nixpkgs-patcher with NixOS-DNS](https://github.com/gepbird/nixpkgs-patcher/issues/4).
+
 ## Adding Patches
 
 ### Using Flake Inputs
