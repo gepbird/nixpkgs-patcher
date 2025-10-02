@@ -35,8 +35,9 @@
       checks.x86_64-linux.tests =
         let
           inherit (self.nixosConfigurations) patched unpatched;
+          lib = import ../lib.nix { inherit nixpkgs; };
         in
-        (import ../lib.nix { inherit nixpkgs; }).runTests {
+        lib.runTests {
           testUnpatchedPackageVersion = {
             expr = unpatched.pkgs.msmtp.version;
             expected = "1.8.26";

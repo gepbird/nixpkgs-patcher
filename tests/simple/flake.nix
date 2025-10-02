@@ -29,8 +29,11 @@
       checks.x86_64-linux.tests =
         let
           inherit (self.nixosConfigurations) patched unpatched;
+          lib = import ../lib.nix { inherit nixpkgs; };
         in
-        (import ../lib.nix { inherit nixpkgs; }).runTests {
+        lib.runTests {
+          testUnpatchedSystemBuilds = lib.testNixosConfigurationBuilds unpatched;
+          testPatchedSystemBuilds = lib.testNixosConfigurationBuilds patched;
           testUnpatchedPackageVersion = {
             expr = unpatched.pkgs.git-review.version;
             expected = "2.4.0";

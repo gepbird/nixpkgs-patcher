@@ -60,8 +60,11 @@
       checks.x86_64-linux.tests =
         let
           inherit (self.nixosConfigurations) patched unpatched;
+          lib = import ../lib.nix { nixpkgs = nixpkgs-unstable; };
         in
-        (import ../lib.nix { nixpkgs = nixpkgs-unstable; }).runTests {
+        lib.runTests {
+          testUnpatchedSystemBuilds = lib.testNixosConfigurationBuilds unpatched;
+          testPatchedSystemBuilds = lib.testNixosConfigurationBuilds patched;
           testUnpatchedOsuVersion = {
             expr = unpatched.pkgs.osu-lazer-bin.version;
             expected = "2025.424.0";
