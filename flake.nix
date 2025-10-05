@@ -72,14 +72,11 @@
             };
           };
 
-        dontCheckModule =
-          { ... }:
-          {
-            # disable checking for an option doesn't exist and others
-            # needed when an option is only available in the patched nixpkgs
-            # but not in the original one
-            _module.check = false;
-          };
+        dontCheckModule = {
+          # disable checking for "The option `services.xyz.enable' does not exist" and other errors
+          # this is a common error when using a module init patch
+          _module.check = false;
+        };
 
         args' = {
           system = null;
