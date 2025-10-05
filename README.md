@@ -551,10 +551,6 @@ Then adding this local patch before the PR will fix the issue:
 }
 ```
 
-## TODO
-
-- work with other flake outputs, not just `nixosConfiguration`
-
 ## Comparison with Alternatives
 
 This flake focuses on ease of use for patching nixpkgs and using it with NixOS.
