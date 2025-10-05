@@ -153,7 +153,7 @@
 
             echo "────────────────────────────────────────────────────────────────────────────────"
             echo "Applying some patches failed. Check the build log above this message."
-            echo "Visit https://github.com/gepbird/nixpkgs-patcher#troubleshooting for help."
+            echo "Visit https://github.com/gepbird/nixpkgs-patcher/blob/main/doc/troubleshooting.md for help."
             echo "You can inspect the state of the patched nixpkgs by attaching to the build shell, or press Ctrl+C to exit:"
             # breakpontHook message gets inserted here
           '';
