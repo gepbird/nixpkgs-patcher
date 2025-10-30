@@ -84,10 +84,14 @@
             metadataModule
             nixpkgsPatcherNixosModule
           ];
+          specialArgs = (args.specialArgs or { }) // {
+            nixpkgs-patched = finalNixpkgs;
+          };
         }
         // removeAttrs args [
           "modules"
           "nixpkgsPatcher"
+          "specialArgs"
         ];
 
         config = args.nixpkgsPatcher or { };
