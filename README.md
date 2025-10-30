@@ -214,6 +214,23 @@ To be extra sure you can use download the patch and reference to it by a local p
 > [!NOTE]  
 > If you are using `fetchpatch`, `fetchpatch2` (or anything that uses `filterdiff` under the hood) instead of `fetchurl`, patching can fail if the only change to any files in the patch is a rename.
 
+## Accessing the Patched Nixpkgs
+
+In your NixOS module you can access the patched nixpkgs as `nixpkgs-patched`.
+It could be useful for example when you want to explicitly import it:
+```nix
+{ nixpkgs-patched, pkgs, ... }:
+
+let
+  pkgs-patched = import nixpkgs-patched {
+    inherit (pkgs) system;
+  };
+in
+{
+  # ...
+}
+```
+
 ## Troubleshooting
 
 See the [troubleshooting documentation](doc/troubleshooting.md).
