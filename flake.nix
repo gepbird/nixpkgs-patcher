@@ -77,6 +77,52 @@
     in
     {
       lib = {
+        patchNixpkgs =
+          {
+            inputs ? null,
+            nixpkgs ? null,
+            patchInputRegex ? defaultPatchInputRegex,
+            patches ? null,
+            pkgs ? null,
+            system ? null,
+          }@args:
+          let
+            nixpkgs' =
+              args.nixpkgs or args.inputs.nixpkgs
+                or (die "Couldn't find your base nixpkgs when calling `patchNixpkgs`. You need to pass `nixpkgs` or have a flake input named `nixpkgs` and pass your `inputs`.");
+            pkgs' =
+              if pkgs != null then
+                pkgs
+              else if system != null then
+                import nixpkgs' { inherit system; }
+              else
+                (die "Couldn't get `pkgs` when calling `patchNixpkgs`. You need to pass your `pkgs` or `system`.");
+
+            maybePatchesFromFlakeInputs =
+              if inputs != null then
+                patchesFromFlakeInputs {
+                  inherit inputs patchInputRegex;
+                  pkgs = pkgs';
+                }
+              else
+                [ ];
+            maybePatches = args.patches or [ ];
+            maybePatchesList =
+              if builtins.typeOf maybePatches == "lambda" then maybePatches pkgs' else maybePatches;
+            patches' =
+              if inputs == null && patches == null then
+                (die "Couldn't find any patches when calling `patchNixpkgs`. You need to pass your flake inputs as `inputs` or a list of patches as `patches` or pass both.")
+              else
+                maybePatchesFromFlakeInputs ++ maybePatchesList;
+
+            patchedNixpkgs = patchNixpkgsRaw {
+              nixpkgs = nixpkgs';
+              patches = patches';
+              pkgs = pkgs';
+            };
+          in
+          patchedNixpkgs;
+
         nixosSystem =
           args:
           let

@@ -3,9 +3,11 @@
 
 Using [nixpkgs](https://github.com/NixOS/nixpkgs) pull requests that haven't landed into your channel has never been easier!
 
+You can use it for your [NixOS configuration](#install-nixpkgs-patcher-for-nixos) or with [other flake outputs](#using-patched-nixpkgs-in-other-flake-outputs) like `packages` or `devShells`.
+
 ## Getting Started
 
-### Install nixpkgs-patcher
+### Install nixpkgs-patcher for NixOS
 
 Modify your flake accordingly:
 - Use `nixpkgs-patcher.lib.nixosSystem` instead of `nixpkgs.lib.nixosSystem`
@@ -213,6 +215,95 @@ To be extra sure you can use download the patch and reference to it by a local p
 
 > [!NOTE]  
 > If you are using `fetchpatch`, `fetchpatch2` (or anything that uses `filterdiff` under the hood) instead of `fetchurl`, patching can fail if the only change to any files in the patch is a rename.
+
+## Using Patched Nixpkgs in Other Flake Outputs
+
+### Basic Usage
+
+This flake provides a standalone `patchNixpkgs` function that in essence takes in the base nixpkgs and outputs a patched version of it.
+Usually you also need to provide the `system` and your `inputs` which contain the patches and your base nixpkgs:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-patcher.url = "github:gepbird/nixpkgs-patcher";
+    nixpkgs-patch-git-review-bump = {
+      url = "https://github.com/NixOS/nixpkgs/pull/410328.diff";
+      flake = false;
+    };
+  };
+
+  outputs =
+    { nixpkgs-patcher, ... }@inputs:
+    {
+      packages.x86_64-linux.patched-git-review =
+        let
+          system = "x86_64-linux";
+          nixpkgs-patched = nixpkgs-patcher.lib.patchNixpkgs { inherit inputs system; };
+          pkgs-patched = import nixpkgs-patched { inherit system; };
+        in
+        pkgs-patched.git-review
+    };
+}
+```
+
+### Advanced Usage
+
+Options mentioned in the [configuration documentation](doc/configuration.md) like naming patch inputs differently, using a different base nixpkgs, or [using patches with `fetchurl`](#using-nixpkgspatcher-config) instead of flake inputs can be similarly achieved with this function, here's a comprehensive example:
+
+```nix
+{
+  inputs = {
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-patcher.url = "github:gepbird/nixpkgs-patcher";
+    nix-pr-mycelium = {
+      url = "https://github.com/NixOS/nixpkgs/pull/410367.diff";
+      flake = false;
+    };
+  };
+
+  outputs =
+    { nixpkgs-patcher, nixpkgs, ... }@inputs:
+    {
+      devShells.x86_64-linux.patched-git-review =
+        let
+          system = "x86_64-linux";
+          pkgs = import nixpkgs { inherit system; };
+          nixpkgs-patched = nixpkgs-patcher.lib.patchNixpkgs {
+            inherit system;
+            nixpkgs = nixpkgs-unstable;
+            patchInputRegex = ".*nix-pr.*"; # default: "^nixpkgs-patch-.*"
+            patches = pkgs: [
+              (pkgs.fetchurl {
+                name = "git-review-bump.diff";
+                url = "https://patch-diff.githubusercontent.com/raw/NixOS/nixpkgs/pull/410328.diff?full_index=1";
+                hash = "sha256-ucUzVEUNfVI+WxDGhzcYywhHOaPrwZRg/9iqkNQGYYw=";
+              })
+            ]
+            # if you provide your `nixpkgs` and `patches` and don't plan to use flake input patches, you can remove `inputs`
+            inputs
+            # optional, if you already have a reference to `pkgs`, this can improve evaluation performance slightly and you don't need to pass `system` in this case
+            pkgs
+          };
+          pkgs-patched = import nixpkgs-patched {
+            system = "x86_64-linux";
+          };
+        in
+        pkgs-patched.mkShell {
+          packages = with pkgs-patched; [
+            git-review
+            mycelium
+          ];
+        };
+    };
+}
+```
+
+> [!NOTE]
+> Unfortunately the patched nixpkgs is only useful for `import`-ing, it doesn't provide flake attributes like `legacyPackages` or `lib`. For `lib.nixosSystem` you can use [`nixpkgs-patcher.lib.nixosSystem`](#install-nixpkgs-patcher-for-nixos). If you need other attributes, please open an issue.
+
 
 ## Troubleshooting
 
