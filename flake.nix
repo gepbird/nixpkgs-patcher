@@ -4,6 +4,29 @@
   outputs =
     { self }:
     let
+      patchesFromFlakeInputs =
+        {
+          inputs,
+          patchInputRegex,
+          pkgs,
+        }:
+        let
+          patches = pkgs.lib.attrsToList (
+            pkgs.lib.filterAttrs (n: v: builtins.match patchInputRegex n != null) inputs
+          );
+          addPatchNameInDerivation =
+            patch:
+            pkgs.stdenvNoCC.mkDerivation {
+              inherit (patch) name;
+
+              phases = [ "installPhase" ];
+              installPhase = ''
+                cp -r ${patch.value.outPath} $out
+              '';
+            };
+        in
+        map addPatchNameInDerivation patches;
+
       nixpkgsVersion =
         {
           nixpkgs,
@@ -53,16 +76,6 @@
         nixosSystem =
           args:
           let
-            inherit (builtins)
-              match
-              removeAttrs
-              ;
-
-            inherit (nixpkgs.lib)
-              attrsToList
-              filterAttrs
-              ;
-
             die = msg: throw "[nixpkgs-patcher]: ${msg}";
 
             metadataModule = {
@@ -126,7 +139,7 @@
                 nixpkgsPatcherNixosModule
               ];
             }
-            // removeAttrs args [
+            // builtins.removeAttrs args [
               "modules"
               "nixpkgsPatcher"
             ];
@@ -154,23 +167,11 @@
             moduleConfig = evaledModules.config.nixpkgs-patcher;
             patchesFromModules = if moduleConfig.enable then moduleConfig.settings.patches else [ ];
 
-            patchesFromFlakeInputsRaw = attrsToList (
-              filterAttrs (n: v: match patchInputRegex n != null) inputs
-            );
-            # this is for setting a nicer name for the patch in the build log
-            patchesFromFlakeInputs = map (
-              patch:
-              pkgs.stdenvNoCC.mkDerivation {
-                inherit (patch) name;
+            patches =
+              (patchesFromFlakeInputs { inherit inputs patchInputRegex pkgs; })
+              ++ (patchesFromConfig pkgs)
+              ++ patchesFromModules;
 
-                phases = [ "installPhase" ];
-                installPhase = ''
-                  cp -r ${patch.value.outPath} $out
-                '';
-              }
-            ) patchesFromFlakeInputsRaw;
-
-            patches = patchesFromFlakeInputs ++ (patchesFromConfig pkgs) ++ patchesFromModules;
             patchedNixpkgs = patchNixpkgsRaw { inherit nixpkgs patches pkgs; };
             finalNixpkgs = if patches == [ ] then nixpkgs else patchedNixpkgs;
 
