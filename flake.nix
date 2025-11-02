@@ -4,6 +4,10 @@
   outputs =
     { self }:
     let
+      die = msg: throw "[nixpkgs-patcher]: ${msg}";
+
+      defaultPatchInputRegex = "^nixpkgs-patch-.*";
+
       patchesFromFlakeInputs =
         {
           inputs,
@@ -76,8 +80,6 @@
         nixosSystem =
           args:
           let
-            die = msg: throw "[nixpkgs-patcher]: ${msg}";
-
             metadataModule = {
               config.nixpkgs.flake.source = toString patchedNixpkgs;
 
@@ -151,7 +153,7 @@
             nixpkgs =
               config.nixpkgs or inputs.nixpkgs
                 or (die "Couldn't find your base nixpkgs. You need to pass the nixosSystem function an attrset with `nixpkgsPatcher.nixpkgs = inputs.nixpkgs` or name your main nixpkgs input `nixpkgs` and pass `specialArgs = inputs`.");
-            patchInputRegex = config.patchInputRegex or "^nixpkgs-patch-.*";
+            patchInputRegex = config.patchInputRegex or defaultPatchInputRegex;
             patchesFromConfig = config.patches or (_: [ ]);
 
             evalArgs = args' // {
