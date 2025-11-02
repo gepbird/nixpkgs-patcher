@@ -12,6 +12,41 @@
         "${
           nixpkgs.lib.substring 0 8 nixpkgs.lastModifiedDate or "19700101"
         }.${nixpkgs.shortRev or "dirty"}${if patches != [ ] then "-patched" else ""}";
+
+      patchNixpkgsRaw =
+        {
+          nixpkgs,
+          patches,
+          pkgs,
+        }:
+        pkgs.applyPatches {
+          name = "nixpkgs-${nixpkgsVersion { inherit nixpkgs patches; }}";
+          src = nixpkgs;
+
+          inherit patches;
+
+          nativeBuildInputs = with pkgs; [
+            bat
+            breakpointHook
+          ];
+
+          failureHook = ''
+            failedPatches=$(find . -name "*.rej")
+            for failedPatch in $failedPatches; do
+              echo "────────────────────────────────────────────────────────────────────────────────"
+              originalFile="${nixpkgs}/''${failedPatch%.rej}"
+              echo "Original file without any patches: $originalFile"
+              echo "Failed hunks of this file:"
+              bat --pager never --style plain $failedPatch
+            done
+
+            echo "────────────────────────────────────────────────────────────────────────────────"
+            echo "Applying some patches failed. Check the build log above this message."
+            echo "Visit https://github.com/gepbird/nixpkgs-patcher/blob/main/doc/troubleshooting.md for help."
+            echo "You can inspect the state of the patched nixpkgs by attaching to the build shell, or press Ctrl+C to exit:"
+            # breakpontHook message gets inserted here
+          '';
+        };
     in
     {
       lib = {
@@ -136,34 +171,7 @@
             ) patchesFromFlakeInputsRaw;
 
             patches = patchesFromFlakeInputs ++ (patchesFromConfig pkgs) ++ patchesFromModules;
-            patchedNixpkgs = pkgs.applyPatches {
-              name = "nixpkgs-${nixpkgsVersion { inherit patches nixpkgs; }}";
-              src = nixpkgs;
-
-              inherit patches;
-
-              nativeBuildInputs = with pkgs; [
-                bat
-                breakpointHook
-              ];
-
-              failureHook = ''
-                failedPatches=$(find . -name "*.rej")
-                for failedPatch in $failedPatches; do
-                  echo "────────────────────────────────────────────────────────────────────────────────"
-                  originalFile="${nixpkgs}/''${failedPatch%.rej}"
-                  echo "Original file without any patches: $originalFile"
-                  echo "Failed hunks of this file:"
-                  bat --pager never --style plain $failedPatch
-                done
-
-                echo "────────────────────────────────────────────────────────────────────────────────"
-                echo "Applying some patches failed. Check the build log above this message."
-                echo "Visit https://github.com/gepbird/nixpkgs-patcher/blob/main/doc/troubleshooting.md for help."
-                echo "You can inspect the state of the patched nixpkgs by attaching to the build shell, or press Ctrl+C to exit:"
-                # breakpontHook message gets inserted here
-              '';
-            };
+            patchedNixpkgs = patchNixpkgsRaw { inherit nixpkgs patches pkgs; };
             finalNixpkgs = if patches == [ ] then nixpkgs else patchedNixpkgs;
 
             nixosSystem = import "${finalNixpkgs}/nixos/lib/eval-config.nix" args';
