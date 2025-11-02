@@ -3,6 +3,16 @@
 
   outputs =
     { self }:
+    let
+      nixpkgsVersion =
+        {
+          nixpkgs,
+          patches,
+        }:
+        "${
+          nixpkgs.lib.substring 0 8 nixpkgs.lastModifiedDate or "19700101"
+        }.${nixpkgs.shortRev or "dirty"}${if patches != [ ] then "-patched" else ""}";
+    in
     {
       lib = {
         nixosSystem =
@@ -11,7 +21,6 @@
             inherit (builtins)
               match
               removeAttrs
-              substring
               ;
 
             inherit (nixpkgs.lib)
@@ -21,19 +30,13 @@
 
             die = msg: throw "[nixpkgs-patcher]: ${msg}";
 
-            # maybe try to import the flake instead, this is for mostly replicating nixosSystem from the flake:
-            # https://github.com/NixOS/nixpkgs/blob/a61befb69a171c7fe6fb141fca18e40624d7f55f/flake.nix#L64-L95
-            metadataModule =
-              { lib, ... }:
-              {
-                config.nixpkgs.flake.source = toString patchedNixpkgs;
+            metadataModule = {
+              config.nixpkgs.flake.source = toString patchedNixpkgs;
 
-                config.system.nixos.versionSuffix = ".${
-                  lib.substring 0 8 nixpkgs.lastModifiedDate or "19700101"
-                }.${nixpkgs.shortRev or "dirty"}${if patches != [ ] then "-patched" else ""}";
+              config.system.nixos.versionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
 
-                config.system.nixos.revision = nixpkgs.rev or "dirty";
-              };
+              config.system.nixos.revision = nixpkgs.rev or "dirty";
+            };
 
             nixpkgsPatcherNixosModule =
               { lib, ... }:
@@ -134,7 +137,7 @@
 
             patches = patchesFromFlakeInputs ++ (patchesFromConfig pkgs) ++ patchesFromModules;
             patchedNixpkgs = pkgs.applyPatches {
-              name = "nixpkgs-${substring 1 (-1) evaledModules.config.system.nixos.versionSuffix}";
+              name = "nixpkgs-${nixpkgsVersion { inherit patches nixpkgs; }}";
               src = nixpkgs;
 
               inherit patches;
