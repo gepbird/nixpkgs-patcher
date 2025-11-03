@@ -2,7 +2,7 @@
   description = "Add patches to nixpkgs seamlessly";
 
   outputs =
-    { self }:
+    _:
     let
       die = msg: throw "[nixpkgs-patcher]: ${msg}";
 
