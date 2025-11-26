@@ -327,7 +327,7 @@ However, if you want to patch other flake inputs or use patches inside packages 
 | Works for any flake on GitHub                                               | ❌ | ✅ | ✅ |
 | Works for any flake                                                         | ❌ | ❌ | ✅ |
 | [IFD](https://nix.dev/manual/nix/2.29/language/import-from-derivation) free | ❌ | ✅ | ❌ |
-| Can be used for modifying other flake inputs' `nixpkgs`                     | ❌ | ✅ | ✅ |
+| Can be used for modifying other flake inputs' `nixpkgs`                     | ❌ | ✅ | ❌ |
 
 ### Why Not Just Use Overlays?
 
