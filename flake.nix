@@ -127,7 +127,10 @@
           args:
           let
             metadataModule = {
-              config.nixpkgs.flake.source = toString patchedNixpkgs;
+              # this should be using `nixpkgsPatched` rather than `nixpkgs`
+              # but that will slow down every command that tries to look up the nixpkgs flake
+              # with the message 'copying "/nix/store/AAA..-patched" to the store'
+              config.nixpkgs.flake.source = toString nixpkgs;
 
               config.system.nixos.versionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
 
