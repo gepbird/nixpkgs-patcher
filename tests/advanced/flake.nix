@@ -3,7 +3,7 @@
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/3d79cbf3caec8f7482ad176f63701168b66e08a3";
     nixpkgs-patcher.url = "../..";
     osu-nix-pr-10-605-3 = {
-      url = "https://github.com/NixOS/nixpkgs/compare/pull/414172/head~2...pull/414172/head.diff";
+      url = "https://github.com/NixOS/nixpkgs/compare/pull/414172/head~2...pull/414172/head.diff?full_index=1";
       flake = false;
     };
     osu-nix-pr-20-607-0 = {
@@ -43,8 +43,8 @@
             pkgs: with pkgs; [
               (fetchurl {
                 name = "glance-environment-file.diff";
-                url = "https://github.com/gepbird/nixpkgs/commit/3bddd16a376b1e7360395ccc4ca1d702644513ce.diff";
-                hash = "sha256-Wb70ETLv3j3MBPV3sXOnENxMf9d1uC/cbQLNOhDtMKU=";
+                url = "https://github.com/gepbird/nixpkgs/commit/3bddd16a376b1e7360395ccc4ca1d702644513ce.diff?full_index=1";
+                hash = "sha256-6/lvpreEKP4HqalCBRhy9QrPGBV8g11czxDZ5mQmzww=";
               })
             ];
         };

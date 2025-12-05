@@ -30,13 +30,13 @@
     "osu-nix-pr-10-605-3": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-R6ThelC7EGxAt+6xCZ+elSwbZjLRC+0ccWHOBVvwiAI=",
+        "narHash": "sha256-KJ+y8AXAsdcDuOIcF9Bw5oPuOFs6rsxiyqWenrb5yd4=",
         "type": "file",
-        "url": "https://github.com/NixOS/nixpkgs/compare/pull/414172/head~2...pull/414172/head.diff"
+        "url": "https://github.com/NixOS/nixpkgs/compare/pull/414172/head~2...pull/414172/head.diff?full_index=1"
       },
       "original": {
         "type": "file",
-        "url": "https://github.com/NixOS/nixpkgs/compare/pull/414172/head~2...pull/414172/head.diff"
+        "url": "https://github.com/NixOS/nixpkgs/compare/pull/414172/head~2...pull/414172/head.diff?full_index=1"
       }
     },
     "osu-nix-pr-20-607-0": {

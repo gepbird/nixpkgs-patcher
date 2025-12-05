@@ -4,7 +4,7 @@
     nixpkgs-2.url = "github:NixOS/nixpkgs/dd90a8666b501e6068a1d56fe6f0b1da85ccac06";
     nixpkgs-patcher.url = "../..";
     nixpkgs-patch-git-review-bump = {
-      url = "https://github.com/NixOS/nixpkgs/pull/410328.diff";
+      url = "https://github.com/NixOS/nixpkgs/pull/410328.diff?full_index=1";
       flake = false;
     };
   };

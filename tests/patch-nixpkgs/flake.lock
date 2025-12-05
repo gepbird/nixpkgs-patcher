@@ -35,13 +35,13 @@
     "nixpkgs-patch-git-review-bump": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-xN8WSy+Ni/hCKwo6c+NHUlWMNfOte4zeKfDsBO4lVh0=",
+        "narHash": "sha256-wAi/2QAQzyWRLCxgJShmNVqmTqc8GQ2CZVYYu5YTkBs=",
         "type": "file",
-        "url": "https://github.com/NixOS/nixpkgs/pull/410328.diff"
+        "url": "https://github.com/NixOS/nixpkgs/pull/410328.diff?full_index=1"
       },
       "original": {
         "type": "file",
-        "url": "https://github.com/NixOS/nixpkgs/pull/410328.diff"
+        "url": "https://github.com/NixOS/nixpkgs/pull/410328.diff?full_index=1"
       }
     },
     "nixpkgs-patcher": {

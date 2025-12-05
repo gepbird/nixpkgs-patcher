@@ -26,8 +26,8 @@
           # https://github.com/twaugh/patchutils/issues/109
           (pkgs.fetchpatch2 {
             name = "msmtp-build-fix-1-8-30.diff";
-            url = "https://github.com/NixOS/nixpkgs/pull/425312.diff";
-            hash = "sha256-4YpIJ+ZrxEE/5jzKqOaaGWLoDlIG71xheXXu+mOG7vQ=";
+            url = "https://github.com/NixOS/nixpkgs/pull/425312.diff?full_index=1";
+            hash = "sha256-313F1u+FI8c2y6pxHlmnFaWKwM1pJD9lyCxNxTxCsW4=";
           })
         ];
       };
@@ -41,8 +41,8 @@
         nixpkgsPatcher.patches = pkgs: [
           (pkgs.fetchurl {
             name = "msmtp-build-fix-1-8-30.diff";
-            url = "https://github.com/NixOS/nixpkgs/pull/425312.diff";
-            hash = "sha256-Laf37gN6jmU2FCCKRHgsiwceMmM5aPSHVi56bPfVB8g=";
+            url = "https://github.com/NixOS/nixpkgs/pull/425312.diff?full_index=1";
+            hash = "sha256-kW+GGVuSX99WUm1wPYFe78k81S/dbfR/XsE5lZ+DsXI=";
           })
         ];
       };
