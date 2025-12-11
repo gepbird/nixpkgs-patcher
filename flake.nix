@@ -54,6 +54,7 @@
 
           nativeBuildInputs = with pkgs; [
             bat
+          ] ++ lib.optionals stdenv.buildPlatform.isLinux [
             breakpointHook
           ];
 
