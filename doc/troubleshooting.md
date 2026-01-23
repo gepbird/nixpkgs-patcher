@@ -49,7 +49,7 @@ If you try to include a PR, on GitHub check for merge conflicts: whether it has 
 In that case you may want to notify the PR author to resolve these conflicts, then update your patch: for example `nix flake update nixpkgs-patch-halo-bump`. 
 
 A conflict can also happen with multiple patches, for example 2 PRs editing the same files.
-In that case you can try to [create an intermediate patch](#create-an-intermediate-patch) to include both PRs.
+In that case you can [vendor the patches](#vendor-a-patch) or try to [create an intermediate patch](#create-an-intermediate-patch) to include both PRs.
 
 ### Base Branch is Outdated
 
@@ -57,7 +57,7 @@ It's possible that a PR would cleanly apply for the target branch (usually maste
 
 Or find the dependant PRs and include them with patches, make sure to [order them correctly](#patches-are-out-of-order)!
 
-Alternatively, try to [create an intermediate patch](#create-an-intermediate-patch).
+Alternatively, you can [vendor the patches](#vendor-a-patch) or try to [create an intermediate patch](#create-an-intermediate-patch).
 
 ### Patches are Out of Order
 
@@ -113,6 +113,47 @@ stdenv.mkDerivation rec {
 From the above 2 outputs, we can see that the patch expects to remove an older version (`-  version = "2.20.21";`), but the original file we have a newer version (`version = "2.21.0";`), this is a case when [the patch is obsolete](#patch-is-obsolete).
 
 This was a simple patch failure, but you might come across more complex ones where this build shell can help you identify the issue, and later possibly [create an intermediate patch](#create-an-intermediate-patch).
+
+### Vendor a Patch
+
+When a patch doesn't apply cleanly due to conflicts or you want to base it to a different branch, the easiest solution is to vendor and modify it.
+
+```nix
+# file: flake.nix
+{
+  inputs = {
+    nixpkgs-patch-halo-bump = {
+      url = "path:./patches/nixpkgs-patch-halo-bump.diff";
+      flake = false;
+    };
+  };
+}
+```
+
+To create the vendored patch file, first find out your base nixpkgs' revision, you can check your flake.lock file.
+Assuming your to-be-patched nixpkgs input is called `nixpkgs`:
+
+```bash
+dotfiles $ nix run nixpkgs#jq -- --raw-output '.nodes.nixpkgs.locked.rev' flake.lock
+5912c1772a44e31bf1c63c0390b90501e5026886
+```
+
+If you haven't already, clone nixpkgs, then check out the revision you want to base the patch on.
+Download and try to apply the patch:
+
+```bash
+nixpkgs $ curl -Ls https://github.com/NixOS/nixpkgs/pull/416893.diff | patch -p1
+patching file pkgs/by-name/ha/halo/package.nix
+Hunk #1 FAILED at 8.
+1 out of 1 hunk FAILED -- saving rejects to file pkgs/by-name/ha/halo/package.nix.rej
+```
+
+Fix the rejects in the main source files, clean up the generated .rej and .orig files.
+Export the diff to your flake that is using nixpkgs patcher, for example:
+
+```bash
+nixpkgs $ git diff > ~/dotfiles/nixpkgs-patch-halo-bump.diff
+```
 
 ### Create an Intermediate Patch
 
