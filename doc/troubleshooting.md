@@ -41,78 +41,28 @@ Below there are some tips that helps you identify why applying the patch failed 
 
 ### Patch is Obsolete
 
-It's possible that you previously included a PR that has already landed in your channel which is very likely when you see *Reversed (or previously applied) patch detected!*, in this case just delete this patch.
+It's possible that you previously included a PR that has already landed in your channel which is very likely when you see *Reversed (or previously applied) patch detected!*.
+In this case just **delete this patch**.
 
 ### Patch has a Merge Conflict
 
 If you try to include a PR, on GitHub check for merge conflicts: whether it has a label called *2.status: merge conflict*, or *This branch has conflicts that must be resolved* at the bottom of the PR.
 In that case you may want to notify the PR author to resolve these conflicts, then update your patch: for example `nix flake update nixpkgs-patch-halo-bump`. 
 
-A conflict can also happen with multiple patches, for example 2 PRs editing the same files.
-In that case you can [vendor the patches](#vendor-a-patch) or try to [create an intermediate patch](#create-an-intermediate-patch) to include both PRs.
+To fix the confict yourself, you can [vendor the patch](#vendor-a-patch) or try to [create an intermediate patch](#create-an-intermediate-patch).
 
 ### Base Branch is Outdated
 
 It's possible that a PR would cleanly apply for the target branch (usually master, staging or release-xx.xx branches), but your base branch is behind those (usually an older version of nixos-unstable, nixpkgs-unstable, nixos-xx.xx branches), in that case try updating your base branch.
 
-Or find the dependant PRs and include them with patches, make sure to [order them correctly](#patches-are-out-of-order)!
-
-Alternatively, you can [vendor the patches](#vendor-a-patch) or try to [create an intermediate patch](#create-an-intermediate-patch).
+If you don't want to change your base branch, you can [vendor the patches](#vendor-a-patch) or try to [create an intermediate patch](#create-an-intermediate-patch).
 
 ### Patches are Out of Order
 
 When you try to include multiple PRs, for example a package bump from v3 to v4, and another from v4 to v5, it's important that v3 to v4 patch gets applied first.
-Patches are applied in alphabetical order, for clarity you can name the first patch `nixpkgs-patch-10-mypackage-v4` and the second `nixpkgs-patch-10-mypackage-v5`.
-If you use patches from multiple sources, then it gets processed in this order: [flake inputs](#using-flake-inputs), [`nixpkgs-patcher.lib.nixosSystem` call](#using-nixpkgspatcher-config), [your configuration](#using-your-configuration).
+Patches are applied in alphabetical order, for clarity you can name the first patch `nixpkgs-patch-10-mypackage-v4` and the second `nixpkgs-patch-20-mypackage-v5`.
 
-### Attach to the Build Shell
-
-At the end of the failure message you get a command which can be really helpful for debugging why did the patch fail.
-To get started enter the command that you see there, for me it's:
-```sh
-sudo /nix/store/y528s2cvrah7sgig54i97gnbq3nppikp-attach/bin/attach 7330040
-````
-
-You can check which files did the patch fail for (but this is also printed in the above message):
-```sh
-bash-5.2# find -name *.rej 
-./pkgs/by-name/ha/halo/package.nix.rej
-
-bash-5.2# cat ./pkgs/by-name/ha/halo/package.nix.rej
---- pkgs/by-name/ha/halo/package.nix
-+++ pkgs/by-name/ha/halo/package.nix
-@@ -8,10 +8,10 @@
- }:
- stdenv.mkDerivation rec {
-   pname = "halo";
--  version = "2.20.21";
-+  version = "2.21.0";
-   src = fetchurl {
-     url = "https://github.com/halo-dev/halo/releases/download/v${version}/halo-${version}.jar";
--    hash = "sha256-hUR5zG6jr8u8pFaGcZJs8MFv+WBMm1oDo6zGaS4Y7BI=";
-+    hash = "sha256-taEaHhPy/jR2ThY9Qk+cded3+LyZSNnrytWh8G5zqVE=";
-   };
- 
-   nativeBuildInputs = [
-```
-
-More interestingly, you can check the original file:
-```sh
-bash-5.2# cat ./pkgs/by-name/ha/halo/package.nix
-# part of the output is omitted
-stdenv.mkDerivation rec {
-  pname = "halo";
-  version = "2.21.0";
-  src = fetchurl {
-    url = "https://github.com/halo-dev/halo/releases/download/v${version}/halo-${version}.jar";
-    hash = "sha256-taEaHhPy/jR2ThY9Qk+cded3+LyZSNnrytWh8G5zqVE=";
-  };
-# part of the output is omitted
-```
-
-From the above 2 outputs, we can see that the patch expects to remove an older version (`-  version = "2.20.21";`), but the original file we have a newer version (`version = "2.21.0";`), this is a case when [the patch is obsolete](#patch-is-obsolete).
-
-This was a simple patch failure, but you might come across more complex ones where this build shell can help you identify the issue, and later possibly [create an intermediate patch](#create-an-intermediate-patch).
+In case you have patches from multiple sources, then it gets processed in this order: [flake inputs](../README.md#using-flake-inputs), [`nixpkgs-patcher.lib.nixosSystem` call](../README.md#using-nixpkgspatcher-config), [your configuration](../README.md#using-your-configuration).
 
 ### Vendor a Patch
 
@@ -290,3 +240,53 @@ Then adding this local patch before the PR will fix the issue:
   }
 }
 ```
+
+### Attach to the Build Shell
+
+At the end of the failure message you get a command which can be really helpful for debugging why did the patch fail.
+To get started enter the command that you see there, for me it's:
+```sh
+sudo /nix/store/y528s2cvrah7sgig54i97gnbq3nppikp-attach/bin/attach 7330040
+````
+
+You can check which files did the patch fail for (but this is also printed in the above message):
+```sh
+bash-5.2# find -name *.rej 
+./pkgs/by-name/ha/halo/package.nix.rej
+
+bash-5.2# cat ./pkgs/by-name/ha/halo/package.nix.rej
+--- pkgs/by-name/ha/halo/package.nix
++++ pkgs/by-name/ha/halo/package.nix
+@@ -8,10 +8,10 @@
+ }:
+ stdenv.mkDerivation rec {
+   pname = "halo";
+-  version = "2.20.21";
++  version = "2.21.0";
+   src = fetchurl {
+     url = "https://github.com/halo-dev/halo/releases/download/v${version}/halo-${version}.jar";
+-    hash = "sha256-hUR5zG6jr8u8pFaGcZJs8MFv+WBMm1oDo6zGaS4Y7BI=";
++    hash = "sha256-taEaHhPy/jR2ThY9Qk+cded3+LyZSNnrytWh8G5zqVE=";
+   };
+ 
+   nativeBuildInputs = [
+```
+
+More interestingly, you can check the original file:
+```sh
+bash-5.2# cat ./pkgs/by-name/ha/halo/package.nix
+# part of the output is omitted
+stdenv.mkDerivation rec {
+  pname = "halo";
+  version = "2.21.0";
+  src = fetchurl {
+    url = "https://github.com/halo-dev/halo/releases/download/v${version}/halo-${version}.jar";
+    hash = "sha256-taEaHhPy/jR2ThY9Qk+cded3+LyZSNnrytWh8G5zqVE=";
+  };
+# part of the output is omitted
+```
+
+From the above 2 outputs, we can see that the patch expects to remove an older version (`-  version = "2.20.21";`), but the original file we have a newer version (`version = "2.21.0";`), this is a case when [the patch is obsolete](#patch-is-obsolete).
+
+This was a simple patch failure, but you might come across more complex ones where this build shell can help you identify the issue, and later possibly [create an intermediate patch](#create-an-intermediate-patch).
+
