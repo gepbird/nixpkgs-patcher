@@ -52,11 +52,14 @@
 
           inherit patches;
 
-          nativeBuildInputs = with pkgs; [
-            bat
-          ] ++ lib.optionals stdenv.buildPlatform.isLinux [
-            breakpointHook
-          ];
+          nativeBuildInputs =
+            with pkgs;
+            [
+              bat
+            ]
+            ++ lib.optionals stdenv.buildPlatform.isLinux [
+              breakpointHook
+            ];
 
           failureHook = ''
             failedPatches=$(find . -name "*.rej")
@@ -224,7 +227,13 @@
               ++ (patchesFromConfig pkgs)
               ++ patchesFromModules;
 
-            patchedNixpkgs = patchNixpkgsRaw { inherit nixpkgs patches pkgs; };
+            patchedNixpkgs = patchNixpkgsRaw {
+              inherit
+                nixpkgs
+                patches
+                pkgs
+                ;
+            };
             finalNixpkgs = if patches == [ ] then nixpkgs else patchedNixpkgs;
 
             nixosSystem = import "${finalNixpkgs}/nixos/lib/eval-config.nix" args';
