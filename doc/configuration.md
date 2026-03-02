@@ -60,6 +60,26 @@ If you don't want to start every patch's name with `nixpkgs-patch-`, you can cha
 }
 ```
 
+### Disabling troubleshooting shell
+
+When building a configuration and some patches can't be applied (usually due to them being already merged), you get a command to enter a [troubleshooting](troubleshooting.md) shell, which makes the build hang forever to keep this shell alive and you have to exit it with Ctrl+C.
+
+To disable this behaviour and make the build exit, you can do this: 
+
+```nix
+# file: flake.nix
+{
+  outputs =
+    { nixpkgs-patcher, ... }@inputs:
+    {
+      nixosConfigurations.yourHostname = nixpkgs-patcher.lib.nixosSystem {
+        # ...
+        nixpkgsPatcher.enableTroubleshootingShell = false; # default: true
+      };
+    };
+}
+```
+
 ### Using a Different System for Evaluation
 
 For example trying to query the hostname of an aarch64-linux host on an x86_64-linux machine would fail by default, but if you specify `nixpkgsPatcher.system` to be the current machine's system, it works:
