@@ -45,6 +45,7 @@
           nixpkgs,
           patches,
           enableTroubleshootingShell,
+          ignoreFailedPatches,
           pkgs,
         }:
         pkgs.applyPatches {
@@ -91,7 +92,8 @@
 
                 # "2>&1" is a hack to make patch fail if the decompressor fails (nonexistent patch, etc.)
                 # shellcheck disable=SC2086
-                $uncompress < "$i" 2>&1 | patch "''${flagsArray[@]}"
+                $uncompress < "$i" 2>&1 | patch "''${flagsArray[@]}" \
+                  || ${builtins.toJSON ignoreFailedPatches}
             done
 
             runHook postPatch
@@ -126,6 +128,7 @@
             patchInputRegex ? defaultPatchInputRegex,
             patches ? null,
             enableTroubleshootingShell ? true,
+            ignoreFailedPatches ? false,
             pkgs ? null,
             system ? null,
           }@args:
@@ -162,7 +165,10 @@
               nixpkgs = nixpkgs';
               patches = patches';
               pkgs = pkgs';
-              inherit enableTroubleshootingShell;
+              inherit
+                enableTroubleshootingShell
+                ignoreFailedPatches
+                ;
             };
           in
           patchedNixpkgs;
@@ -269,11 +275,14 @@
 
             enableTroubleshootingShell = config.enableTroubleshootingShell or true;
 
+            ignoreFailedPatches = config.ignoreFailedPatches or false;
+
             patchedNixpkgs = patchNixpkgsRaw {
               inherit
                 nixpkgs
                 patches
                 enableTroubleshootingShell
+                ignoreFailedPatches
                 pkgs
                 ;
             };
