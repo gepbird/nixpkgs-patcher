@@ -62,6 +62,41 @@
               breakpointHook
             ];
 
+          patchPhase = ''
+            runHook prePatch
+
+            local -a patchesArray
+            concatTo patchesArray patches
+
+            local -a flagsArray
+            concatTo flagsArray patchFlags=-p1
+
+            for i in "''${patchesArray[@]}"; do
+                echo "applying patch $i"
+                local uncompress=cat
+                case "$i" in
+                    *.gz)
+                        uncompress="gzip -d"
+                        ;;
+                    *.bz2)
+                        uncompress="bzip2 -d"
+                        ;;
+                    *.xz)
+                        uncompress="xz -d"
+                        ;;
+                    *.lzma)
+                        uncompress="lzma -d"
+                        ;;
+                esac
+
+                # "2>&1" is a hack to make patch fail if the decompressor fails (nonexistent patch, etc.)
+                # shellcheck disable=SC2086
+                $uncompress < "$i" 2>&1 | patch "''${flagsArray[@]}"
+            done
+
+            runHook postPatch
+          '';
+
           failureHook = ''
             failedPatches=$(find . -name "*.rej")
             for failedPatch in $failedPatches; do
