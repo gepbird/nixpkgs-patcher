@@ -44,6 +44,7 @@
         {
           nixpkgs,
           patches,
+          enableTroubleshootingShell,
           pkgs,
         }:
         pkgs.applyPatches {
@@ -52,11 +53,14 @@
 
           inherit patches;
 
-          nativeBuildInputs = with pkgs; [
-            bat
-          ] ++ lib.optionals stdenv.buildPlatform.isLinux [
-            breakpointHook
-          ];
+          nativeBuildInputs =
+            with pkgs;
+            [
+              bat
+            ]
+            ++ lib.optionals (stdenv.buildPlatform.isLinux && enableTroubleshootingShell) [
+              breakpointHook
+            ];
 
           failureHook = ''
             failedPatches=$(find . -name "*.rej")
@@ -71,6 +75,8 @@
             echo "────────────────────────────────────────────────────────────────────────────────"
             echo "Applying some patches failed. Check the build log above this message."
             echo "Visit https://github.com/gepbird/nixpkgs-patcher/blob/main/doc/troubleshooting.md for help."
+          ''
+          + pkgs.lib.optionalString enableTroubleshootingShell ''
             echo "You can inspect the state of the patched nixpkgs by attaching to the build shell, or press Ctrl+C to exit:"
             # breakpontHook message gets inserted here
           '';
@@ -84,6 +90,7 @@
             nixpkgs ? null,
             patchInputRegex ? defaultPatchInputRegex,
             patches ? null,
+            enableTroubleshootingShell ? true,
             pkgs ? null,
             system ? null,
           }@args:
@@ -120,6 +127,7 @@
               nixpkgs = nixpkgs';
               patches = patches';
               pkgs = pkgs';
+              inherit enableTroubleshootingShell;
             };
           in
           patchedNixpkgs;
@@ -224,7 +232,16 @@
               ++ (patchesFromConfig pkgs)
               ++ patchesFromModules;
 
-            patchedNixpkgs = patchNixpkgsRaw { inherit nixpkgs patches pkgs; };
+            enableTroubleshootingShell = config.enableTroubleshootingShell or true;
+
+            patchedNixpkgs = patchNixpkgsRaw {
+              inherit
+                nixpkgs
+                patches
+                enableTroubleshootingShell
+                pkgs
+                ;
+            };
             finalNixpkgs = if patches == [ ] then nixpkgs else patchedNixpkgs;
 
             nixosSystem = import "${finalNixpkgs}/nixos/lib/eval-config.nix" args';

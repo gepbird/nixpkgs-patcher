@@ -31,6 +31,11 @@ Failed hunks of this file:
 ────────────────────────────────────────────────────────────────────────────────
 Applying some patches failed. Check the build log above this message.
 Visit https://github.com/gepbird/nixpkgs-patcher#troubleshooting for help.
+```
+
+Unless you have [disabled the troubleshooting shell](configuration.md#disabling-troubleshooting-shell):
+
+```console
 You can inspect the state of the patched nixpkgs by attaching to the build shell, or press Ctrl+C to exit:
 build for nixpkgs-20250616.0917744-patched failed in patchPhase with exit code 1
 To attach, run the following command:
