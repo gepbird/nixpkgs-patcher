@@ -5,8 +5,8 @@ This example shows how to use `nixpkgs-patcher` in a **flake-parts** project to 
 The process has three steps:
 
 1. Add nixpkgs-patcher and patches as flake inputs
-2. Patch nixpkgs in perSystem
-3. Use the patched pkgs in your NixOS configuration
+2. Patch nixpkgs in `perSystem`
+3. Use the patched `pkgs` in your NixOS configuration
 
 ---
 
