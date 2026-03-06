@@ -57,9 +57,10 @@ Rebuild your system and enjoy using the PRs early!
 
 ## Configuration
 
-The above introduction is likely everything you need to know to use this flake effectively. However, there are additional configuration options for more advanced use cases.
+The above introduction is likely everything you need to know to use this flake effectively. For more advanced setups and additional configuration options, see:
 
-See the [configuration documentation](doc/configuration.md).
+- [Configuration documentation](doc/configuration.md)
+- [flake-parts example](doc/flake-parts.md)
 
 ## Adding Patches
 
