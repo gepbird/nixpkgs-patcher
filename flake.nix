@@ -45,6 +45,7 @@
           nixpkgs,
           patches,
           enableTroubleshootingShell,
+          ignoreFailedPatches,
           pkgs,
         }:
         pkgs.applyPatches {
@@ -61,6 +62,42 @@
             ++ lib.optionals (stdenv.buildPlatform.isLinux && enableTroubleshootingShell) [
               breakpointHook
             ];
+
+          patchPhase = ''
+            runHook prePatch
+
+            local -a patchesArray
+            concatTo patchesArray patches
+
+            local -a flagsArray
+            concatTo flagsArray patchFlags=-p1
+
+            for i in "''${patchesArray[@]}"; do
+                echo "applying patch $i"
+                local uncompress=cat
+                case "$i" in
+                    *.gz)
+                        uncompress="gzip -d"
+                        ;;
+                    *.bz2)
+                        uncompress="bzip2 -d"
+                        ;;
+                    *.xz)
+                        uncompress="xz -d"
+                        ;;
+                    *.lzma)
+                        uncompress="lzma -d"
+                        ;;
+                esac
+
+                # "2>&1" is a hack to make patch fail if the decompressor fails (nonexistent patch, etc.)
+                # shellcheck disable=SC2086
+                $uncompress < "$i" 2>&1 | patch "''${flagsArray[@]}" \
+                  || ${builtins.toJSON ignoreFailedPatches}
+            done
+
+            runHook postPatch
+          '';
 
           failureHook = ''
             failedPatches=$(find . -name "*.rej")
@@ -91,6 +128,7 @@
             patchInputRegex ? defaultPatchInputRegex,
             patches ? null,
             enableTroubleshootingShell ? true,
+            ignoreFailedPatches ? false,
             pkgs ? null,
             system ? null,
           }@args:
@@ -127,7 +165,10 @@
               nixpkgs = nixpkgs';
               patches = patches';
               pkgs = pkgs';
-              inherit enableTroubleshootingShell;
+              inherit
+                enableTroubleshootingShell
+                ignoreFailedPatches
+                ;
             };
           in
           patchedNixpkgs;
@@ -234,11 +275,14 @@
 
             enableTroubleshootingShell = config.enableTroubleshootingShell or true;
 
+            ignoreFailedPatches = config.ignoreFailedPatches or false;
+
             patchedNixpkgs = patchNixpkgsRaw {
               inherit
                 nixpkgs
                 patches
                 enableTroubleshootingShell
+                ignoreFailedPatches
                 pkgs
                 ;
             };

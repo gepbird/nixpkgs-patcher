@@ -80,6 +80,26 @@ To disable this behaviour and make the build exit, you can do this:
 }
 ```
 
+### Ignore failed patches
+
+When building a configuration and some patches can't be applied (usually due to them being already merged), it a build failure.
+
+To only give a warning instead of a build failure, you can do this:
+
+```nix
+# file: flake.nix
+{
+  outputs =
+    { nixpkgs-patcher, ... }@inputs:
+    {
+      nixosConfigurations.yourHostname = nixpkgs-patcher.lib.nixosSystem {
+        # ...
+        nixpkgsPatcher.ignoreFailedPatches = true; # default: false
+      };
+    };
+}
+```
+
 ### Using a Different System for Evaluation
 
 For example trying to query the hostname of an aarch64-linux host on an x86_64-linux machine would fail by default, but if you specify `nixpkgsPatcher.system` to be the current machine's system, it works:
