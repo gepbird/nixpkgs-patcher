@@ -167,7 +167,7 @@
           evalArgs = args' // {
             modules = args'.modules ++ [ dontCheckModule ];
           };
-          evaledModules = import "${nixpkgs}/nixos/lib/eval-config.nix" evalArgs;
+          evaledModules = nixpkgs.lib.nixosSystem evalArgs;
           system =
             config.system or (
               if args'.system != null then args'.system else evaledModules.config.nixpkgs.hostPlatform.system
