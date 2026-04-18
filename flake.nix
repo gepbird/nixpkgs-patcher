@@ -82,11 +82,17 @@
           '';
         };
 
-      nixosSystem =
+      makePatchedSystem =
+        {
+          systemType,
+        }:
         args:
         let
-          metadataModule = {
-            config = {
+          selectSystem =
+            systemAttrs: systemAttrs."${systemType}" or (die "${systemType} is an invalid system type.");
+
+          metadataModule = selectSystem {
+            nixosSystem.config = {
               # this should be using `finalNixpkgs` rather than `nixpkgs`
               # but that will slow down every command that tries to look up the nixpkgs flake
               # with the message 'copying "/nix/store/AAA..-patched" to the store'
@@ -159,17 +165,19 @@
           config = args.nixpkgsPatcher or { };
           inputs =
             config.inputs or args.specialArgs
-              or (die "Couldn't find your flake inputs. You need to pass the nixosSystem function an attrset with `nixpkgsPatcher.inputs = inputs` or `specialArgs = inputs`.");
+              or (die "Couldn't find your flake inputs. You need to pass the ${systemType} function an attrset with `nixpkgsPatcher.inputs = inputs` or `specialArgs = inputs`.");
           nixpkgs =
             config.nixpkgs or inputs.nixpkgs
-              or (die "Couldn't find your base nixpkgs. You need to pass the nixosSystem function an attrset with `nixpkgsPatcher.nixpkgs = inputs.nixpkgs` or name your main nixpkgs input `nixpkgs` and pass `specialArgs = inputs`.");
+              or (die "Couldn't find your base nixpkgs. You need to pass the ${systemType} function an attrset with `nixpkgsPatcher.nixpkgs = inputs.nixpkgs` or name your main nixpkgs input `nixpkgs` and pass `specialArgs = inputs`.");
           patchInputRegex = config.patchInputRegex or defaultPatchInputRegex;
           patchesFromConfig = config.patches or (_: [ ]);
 
           evalArgs = args' // {
             modules = args'.modules ++ [ dontCheckModule ];
           };
-          evaledModules = nixpkgs.lib.nixosSystem evalArgs;
+          evaledModules = selectSystem {
+            nixosSystem = nixpkgs.lib.nixosSystem evalArgs;
+          };
           system =
             config.system or (
               if args'.system != null then args'.system else evaledModules.config.nixpkgs.hostPlatform.system
@@ -195,10 +203,10 @@
               ;
           };
           finalNixpkgs = if patches == [ ] then nixpkgs else patchedNixpkgs;
-
-          nixosSystem = import "${finalNixpkgs}/nixos/lib/eval-config.nix" args';
         in
-        nixosSystem;
+        selectSystem {
+          nixosSystem = import "${finalNixpkgs}/nixos/lib/eval-config.nix" args';
+        };
     in
     {
       lib = {
@@ -250,7 +258,7 @@
           in
           patchedNixpkgs;
 
-        inherit nixosSystem;
+        nixosSystem = makePatchedSystem { systemType = "nixosSystem"; };
       };
     };
 }
