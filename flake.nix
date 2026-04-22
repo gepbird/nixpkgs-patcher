@@ -91,18 +91,25 @@
           selectSystem =
             systemAttrs: systemAttrs."${systemType}" or (die "${systemType} is an invalid system type.");
 
-          metadataModule = selectSystem {
-            nixosSystem.config = {
-              # this should be using `finalNixpkgs` rather than `nixpkgs`
-              # but that will slow down every command that tries to look up the nixpkgs flake
-              # with the message 'copying "/nix/store/AAA..-patched" to the store'
-              nixpkgs.flake.source = toString nixpkgs;
-
-              system.nixos.versionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
-
-              system.nixos.revision = nixpkgs.rev or "dirty";
+          metadataModule =
+            selectSystem {
+              nixosSystem.config = {
+                system.nixos.versionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
+                system.nixos.revision = nixpkgs.rev or "dirty";
+              };
+              darwinSystem.config = {
+                system.darwinVersionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
+                system.darwinRevision = nixpkgs.rev or "dirty";
+              };
+            }
+            // {
+              config = {
+                # this should be using `finalNixpkgs` rather than `nixpkgs`
+                # but that will slow down every command that tries to look up the nixpkgs flake
+                # with the message 'copying "/nix/store/AAA..-patched" to the store'
+                nixpkgs.flake.source = toString nixpkgs;
+              };
             };
-          };
 
           nixpkgsPatcherNixosModule =
             { lib, ... }:
@@ -151,12 +158,12 @@
           };
 
           args' = {
-            system = null;
             modules = args.modules ++ [
               metadataModule
               nixpkgsPatcherNixosModule
             ];
           }
+          // nixpkgs.lib.optionalAttrs (systemType == "nixosSystem") { system = null; }
           // builtins.removeAttrs args [
             "modules"
             "nixpkgsPatcher"
@@ -169,6 +176,9 @@
           nixpkgs =
             config.nixpkgs or inputs.nixpkgs
               or (die "Couldn't find your base nixpkgs. You need to pass the ${systemType} function an attrset with `nixpkgsPatcher.nixpkgs = inputs.nixpkgs` or name your main nixpkgs input `nixpkgs` and pass `specialArgs = inputs`.");
+          nix-darwin =
+            config.nix-darwin or inputs.nix-darwin
+              or (die "Couldn't find your nix-darwin. You need to pass the ${systemType} function an attrset with `nixpkgsPatcher.nix-darwin = inputs.nix-darwin` or name your main nix-darwin input `nix-darwin` and pass `specialArgs = inputs`.");
           patchInputRegex = config.patchInputRegex or defaultPatchInputRegex;
           patchesFromConfig = config.patches or (_: [ ]);
 
@@ -177,10 +187,14 @@
           };
           evaledModules = selectSystem {
             nixosSystem = nixpkgs.lib.nixosSystem evalArgs;
+            darwinSystem = nix-darwin.lib.darwinSystem evalArgs;
           };
           system =
             config.system or (
-              if args'.system != null then args'.system else evaledModules.config.nixpkgs.hostPlatform.system
+              if args' ? system && args'.system != null then
+                args'.system
+              else
+                evaledModules.config.nixpkgs.hostPlatform.system
             );
           pkgs = import nixpkgs { inherit system; };
 
@@ -203,9 +217,19 @@
               ;
           };
           finalNixpkgs = if patches == [ ] then nixpkgs else patchedNixpkgs;
+          finalPkgs = import finalNixpkgs {
+            inherit (evaledModules.config.nixpkgs) config;
+            inherit system;
+          };
         in
         selectSystem {
           nixosSystem = import "${finalNixpkgs}/nixos/lib/eval-config.nix" args';
+          darwinSystem = nix-darwin.lib.darwinSystem (
+            args'
+            // {
+              pkgs = finalPkgs;
+            }
+          );
         };
     in
     {
@@ -259,6 +283,7 @@
           patchedNixpkgs;
 
         nixosSystem = makePatchedSystem { systemType = "nixosSystem"; };
+        darwinSystem = makePatchedSystem { systemType = "darwinSystem"; };
       };
     };
 }
