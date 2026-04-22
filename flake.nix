@@ -86,14 +86,16 @@
         args:
         let
           metadataModule = {
-            # this should be using `nixpkgsPatched` rather than `nixpkgs`
-            # but that will slow down every command that tries to look up the nixpkgs flake
-            # with the message 'copying "/nix/store/AAA..-patched" to the store'
-            config.nixpkgs.flake.source = toString nixpkgs;
+            config = {
+              # this should be using `finalNixpkgs` rather than `nixpkgs`
+              # but that will slow down every command that tries to look up the nixpkgs flake
+              # with the message 'copying "/nix/store/AAA..-patched" to the store'
+              nixpkgs.flake.source = toString nixpkgs;
 
-            config.system.nixos.versionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
+              system.nixos.versionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
 
-            config.system.nixos.revision = nixpkgs.rev or "dirty";
+              system.nixos.revision = nixpkgs.rev or "dirty";
+            };
           };
 
           nixpkgsPatcherNixosModule =
