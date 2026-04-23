@@ -3,11 +3,13 @@
 
 Using [nixpkgs](https://github.com/NixOS/nixpkgs) pull requests that haven't landed into your channel has never been easier!
 
-You can use it for your [NixOS configuration](#install-nixpkgs-patcher-for-nixos) or with [other flake outputs](#using-patched-nixpkgs-in-other-flake-outputs) like `packages` or `devShells`.
+You can use it for your [NixOS or nix-darwin configuration](#install-nixpkgs-patcher-for-your-system) or with [other flake outputs](#using-patched-nixpkgs-in-other-flake-outputs) like `packages` or `devShells`.
 
 ## Getting Started
 
-### Install nixpkgs-patcher for NixOS
+### Install nixpkgs-patcher for your system
+
+#### NixOS
 
 Modify your flake accordingly:
 - Use `nixpkgs-patcher.lib.nixosSystem` instead of `nixpkgs.lib.nixosSystem`
@@ -28,6 +30,33 @@ Modify your flake accordingly:
         modules = [
           ./configuration.nix
           ./hardware-configuration.nix
+        ];
+        specialArgs = inputs;
+      };
+}
+```
+
+#### nix-darwin
+
+Modify your flake accordingly:
+- Use `nixpkgs-patcher.lib.darwinSystem` instead of `nix-darwin.lib.darwinSystem`
+- Ensure that you pass the `inputs` to `specialArgs`
+
+```nix
+# file: flake.nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs-patcher.url = "github:gepbird/nixpkgs-patcher";
+    nix-darwin.url = "github:nix-darwin/nix-darwin";
+  };
+
+  outputs =
+    { nixpkgs-patcher, ... }@inputs:
+    {
+      darwinConfigurations.yourHostname = nixpkgs-patcher.lib.darwinSystem {
+        modules = [
+          ./configuration.nix
         ];
         specialArgs = inputs;
       };
@@ -83,7 +112,7 @@ This is the fastest way in my opinion, because all you have to do is add a flake
 
 ### Using nixpkgsPatcher Config
 
-You can also define patches similarly to how you configured this flake. Provide a `nixpkgsPatcher.patches` attribute to `nixosSystem` that takes in `pkgs` and outputs a list of patches.
+You can also define patches similarly to how you configured this flake. Provide a `nixpkgsPatcher.patches` attribute to `nixosSystem` (or `darwinSystem`) that takes in `pkgs` and outputs a list of patches.
 
 ```nix
 # file: flake.nix
@@ -207,7 +236,7 @@ You can use these patch formats with all the 3 methods above, not only as flake 
 PRs can change over time, some commits might be added or replaced by a force-push.
 To update only a single patch you can run `nix flake update nixpkgs-patch-git-review-bump` for example.
 Running your usual flake update command like `nix flake update --commit-lock-file` will also update all patches.
-If you use an "unstable" URL format like `https://github.com/NixOS/nixpkgs/pull/410328.diff`, you can get different patches at different time, or even different patches at the sime time on different machines because Nix already downloaded and cached the patch on one machine but not on the other.
+If you use an "unstable" URL format like `https://github.com/NixOS/nixpkgs/pull/410328.diff`, you can get different patches at different times, or even different patches at the same time on different machines because Nix already downloaded and cached the patch on one machine but not on the other.
 To guarantee reproducibility, you can use the `https://github.com/NixOS/nixpkgs/commit/1123658f39e7635e8d10a1b0691d2ad310ac24fc.diff` format for single commits, or `https://github.com/NixOS/nixpkgs/compare/b024ced1aac25639f8ca8fdfc2f8c4fbd66c48ef...0330cef96364bfd90694ea782d54e64717aced63.diff` for a range of commits.
 To be extra sure you can use download the patch and reference to it by a local path, or use a different method that requires specifying a hash (see below).
 
@@ -303,7 +332,7 @@ Options mentioned in the [configuration documentation](doc/configuration.md) lik
 ```
 
 > [!NOTE]
-> Unfortunately the patched nixpkgs is only useful for `import`-ing, it doesn't provide flake attributes like `legacyPackages` or `lib`. For `lib.nixosSystem` you can use [`nixpkgs-patcher.lib.nixosSystem`](#install-nixpkgs-patcher-for-nixos). If you need other attributes, please open an issue.
+> Unfortunately the patched nixpkgs is only useful for `import`-ing, it doesn't provide flake attributes like `legacyPackages` or `lib`. For `lib.nixosSystem` you can use [`nixpkgs-patcher.lib.nixosSystem`](#install-nixpkgs-patcher-for-your-system). If you need other attributes, please open an issue.
 
 
 ## Troubleshooting
@@ -312,23 +341,23 @@ See the [troubleshooting documentation](doc/troubleshooting.md).
 
 ## Comparison with Alternatives
 
-This flake focuses on ease of use for patching nixpkgs and using it with NixOS.
+This flake focuses on ease of use for patching nixpkgs and using it with NixOS, nix-darwin or just `import`-ing it to get a `pkgs` instance with some patches.
 It requires less effort to understand and quickly start using it compared to alternatives.
-However, if you want to patch other flake inputs or use patches inside packages or devshells, check out the alternatives!
+However, if you want to patch other flake inputs, check out the alternatives!
 
 | | nixpkgs-patcher | [nix-patcher](https://github.com/katrinafyi/nix-patcher) | [flake-input-patcher](https://github.com/jfly/flake-input-patcher) |
-|------------------------------                                               |----|----|----|
-| Patches defined as [flake inputs](#using-flake-inputs)                      | ✅ | ✅ | ❌ |
-| Patches defined in [your NixOS configuration](#using-your-configuration)    | ✅ | ❌ | ❌ |
-| Patches using [fetchurl](#using-your-configuration)                         | ✅ | ❌ | ✅ |
-| Local only                                                                  | ✅ | ❌ | ✅ |
-| No extra eval time spent with locally applying patches (cached)             | ❌ | ✅ | ❌ |
-| Doesn't require additional tools                                            | ✅ | ❌ | ✅ |
-| Automatic `system` detection                                                | ✅ | ✅ | ❌ |
-| Works for any flake on GitHub                                               | ❌ | ✅ | ✅ |
-| Works for any flake                                                         | ❌ | ❌ | ✅ |
-| [IFD](https://nix.dev/manual/nix/2.29/language/import-from-derivation) free | ❌ | ✅ | ❌ |
-| Can be used for modifying other flake inputs' `nixpkgs`                     | ❌ | ✅ | ❌ |
+|------------------------------                                                             |----|----|----|
+| Patches defined as [flake inputs](#using-flake-inputs)                                    | ✅ | ✅ | ❌ |
+| Patches defined in [your NixOS or nix-darwin configuration](#using-your-configuration)    | ✅ | ❌ | ❌ |
+| Patches using [fetchurl](#using-your-configuration)                                       | ✅ | ❌ | ✅ |
+| Local only                                                                                | ✅ | ❌ | ✅ |
+| No extra eval time spent with locally applying patches (cached)                           | ❌ | ✅ | ❌ |
+| Doesn't require additional tools                                                          | ✅ | ❌ | ✅ |
+| Automatic `system` detection                                                              | ✅ | ✅ | ❌ |
+| Works for any flake on GitHub                                                             | ❌ | ✅ | ✅ |
+| Works for any flake                                                                       | ❌ | ❌ | ✅ |
+| [IFD](https://nix.dev/manual/nix/2.29/language/import-from-derivation) free               | ❌ | ✅ | ❌ |
+| Can be used for modifying other flake inputs' `nixpkgs`                                   | ❌ | ✅ | ❌ |
 
 ### Why Not Just Use Overlays?
 
