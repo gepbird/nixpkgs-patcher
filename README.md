@@ -236,7 +236,7 @@ You can use these patch formats with all the 3 methods above, not only as flake 
 PRs can change over time, some commits might be added or replaced by a force-push.
 To update only a single patch you can run `nix flake update nixpkgs-patch-git-review-bump` for example.
 Running your usual flake update command like `nix flake update --commit-lock-file` will also update all patches.
-If you use an "unstable" URL format like `https://github.com/NixOS/nixpkgs/pull/410328.diff`, you can get different patches at different time, or even different patches at the sime time on different machines because Nix already downloaded and cached the patch on one machine but not on the other.
+If you use an "unstable" URL format like `https://github.com/NixOS/nixpkgs/pull/410328.diff`, you can get different patches at different times, or even different patches at the same time on different machines because Nix already downloaded and cached the patch on one machine but not on the other.
 To guarantee reproducibility, you can use the `https://github.com/NixOS/nixpkgs/commit/1123658f39e7635e8d10a1b0691d2ad310ac24fc.diff` format for single commits, or `https://github.com/NixOS/nixpkgs/compare/b024ced1aac25639f8ca8fdfc2f8c4fbd66c48ef...0330cef96364bfd90694ea782d54e64717aced63.diff` for a range of commits.
 To be extra sure you can use download the patch and reference to it by a local path, or use a different method that requires specifying a hash (see below).
 
