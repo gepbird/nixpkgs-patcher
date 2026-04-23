@@ -341,9 +341,9 @@ See the [troubleshooting documentation](doc/troubleshooting.md).
 
 ## Comparison with Alternatives
 
-This flake focuses on ease of use for patching nixpkgs and using it with NixOS or nix-darwin.
+This flake focuses on ease of use for patching nixpkgs and using it with NixOS, nix-darwin or just `import`-ing it to get a `pkgs` instance with some patches.
 It requires less effort to understand and quickly start using it compared to alternatives.
-However, if you want to patch other flake inputs or use patches inside packages or devshells, check out the alternatives!
+However, if you want to patch other flake inputs, check out the alternatives!
 
 | | nixpkgs-patcher | [nix-patcher](https://github.com/katrinafyi/nix-patcher) | [flake-input-patcher](https://github.com/jfly/flake-input-patcher) |
 |------------------------------                                                             |----|----|----|
