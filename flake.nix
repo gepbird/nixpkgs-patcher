@@ -279,8 +279,10 @@
               pkgs = pkgs';
               inherit enableTroubleshootingShell;
             };
+
+            finalNixpkgs = if patches' == [ ] then nixpkgs' else patchedNixpkgs;
           in
-          patchedNixpkgs;
+          finalNixpkgs;
 
         nixosSystem = makePatchedSystem { systemType = "nixosSystem"; };
         darwinSystem = makePatchedSystem { systemType = "darwinSystem"; };
