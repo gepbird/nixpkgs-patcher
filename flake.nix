@@ -92,24 +92,25 @@
             systemAttrs: systemAttrs."${systemType}" or (die "${systemType} is an invalid system type.");
 
           metadataModule =
-            selectSystem {
-              nixosSystem.config = {
-                system.nixos.versionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
-                system.nixos.revision = nixpkgs.rev or "dirty";
+            nixpkgs.lib.recursiveUpdate
+              (selectSystem {
+                nixosSystem.config = {
+                  system.nixos.versionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
+                  system.nixos.revision = nixpkgs.rev or "dirty";
+                };
+                darwinSystem.config = {
+                  system.darwinVersionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
+                  system.darwinRevision = nixpkgs.rev or "dirty";
+                };
+              })
+              {
+                config = {
+                  # this should be using `finalNixpkgs` rather than `nixpkgs`
+                  # but that will slow down every command that tries to look up the nixpkgs flake
+                  # with the message 'copying "/nix/store/AAA..-patched" to the store'
+                  nixpkgs.flake.source = toString nixpkgs;
+                };
               };
-              darwinSystem.config = {
-                system.darwinVersionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
-                system.darwinRevision = nixpkgs.rev or "dirty";
-              };
-            }
-            // {
-              config = {
-                # this should be using `finalNixpkgs` rather than `nixpkgs`
-                # but that will slow down every command that tries to look up the nixpkgs flake
-                # with the message 'copying "/nix/store/AAA..-patched" to the store'
-                nixpkgs.flake.source = toString nixpkgs;
-              };
-            };
 
           nixpkgsPatcherNixosModule =
             { lib, ... }:

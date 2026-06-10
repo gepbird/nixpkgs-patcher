@@ -93,6 +93,14 @@
             expr = patched.config.services ? lact;
             expected = true;
           };
+          testUnpatchedVersionSuffix = {
+            expr = builtins.match "^\\.[0-9]+\\.[0-9a-f]+$" unpatched.config.system.nixos.versionSuffix != null;
+            expected = true;
+          };
+          testPatchedVersionSuffix = {
+            expr = builtins.match "^\\.[0-9]+\\.[0-9a-f]+-patched$" patched.config.system.nixos.versionSuffix != null;
+            expected = true;
+          };
         };
     };
 }
