@@ -1,8 +1,8 @@
-{ nixpkgs }:
+{ nixpkgs, system }:
 
 let
   inherit (nixpkgs) lib;
-  pkgs = import nixpkgs { system = "x86_64-linux"; };
+  pkgs = import nixpkgs { inherit system; };
 
   runTests =
     tests:

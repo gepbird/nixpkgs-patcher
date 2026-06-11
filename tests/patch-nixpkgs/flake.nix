@@ -86,7 +86,7 @@
             patchedAdvanced1
             patchedAdvanced2
             ;
-          lib = import ../lib.nix { inherit nixpkgs; };
+          lib = import ../lib.nix { inherit nixpkgs system; };
         in
         lib.runTests {
           testUnpatchedPackageVersion = {

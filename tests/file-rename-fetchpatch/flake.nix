@@ -50,7 +50,7 @@
       checks.x86_64-linux.tests =
         let
           inherit (self.nixosConfigurations) unpatched patchedFails patchedWorks;
-          lib = import ../lib.nix { inherit nixpkgs; };
+          lib = import ../lib.nix { inherit nixpkgs; system = "x86_64-linux"; };
         in
         lib.runTests {
           # this is failing, because msmtp doesn't build

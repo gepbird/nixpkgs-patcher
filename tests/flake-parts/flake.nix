@@ -18,11 +18,11 @@
         ./hosts.nix
       ];
 
-      perSystem = {
+      perSystem = { system, ... }: {
         checks.tests =
           let
             inherit (inputs.self.nixosConfigurations) patched unpatched;
-            lib = import ../lib.nix { inherit (inputs) nixpkgs; };
+            lib = import ../lib.nix { inherit (inputs) nixpkgs; inherit system; };
           in
           lib.runTests {
             testUnpatchedSystemBuilds = lib.testNixosConfigurationBuilds unpatched;

@@ -29,7 +29,7 @@
       checks.x86_64-linux.tests =
         let
           inherit (self.nixosConfigurations) patched unpatched;
-          lib = import ../lib.nix { inherit nixpkgs; };
+          lib = import ../lib.nix { inherit nixpkgs; system = "x86_64-linux"; };
         in
         lib.runTests {
           testUnpatchedSystemBuilds = lib.testNixosConfigurationBuilds unpatched;

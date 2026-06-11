@@ -51,7 +51,7 @@
         let
           inherit (self.nixosConfigurations) unpatched patchedEvalFails patchedEvalWorks;
         in
-        (import ../lib.nix { inherit nixpkgs; }).runTests {
+        (import ../lib.nix { inherit nixpkgs; system = "x86_64-linux"; }).runTests {
           testUnpatchedHostname = {
             expr = unpatched.config.networking.hostName;
             expected = "yourHostname";
