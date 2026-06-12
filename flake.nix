@@ -99,8 +99,8 @@
                   system.nixos.revision = nixpkgs.rev or "dirty";
                 };
                 darwinSystem.config = {
-                  system.darwinVersionSuffix = ".${nixpkgsVersion { inherit nixpkgs patches; }}";
-                  system.darwinRevision = nixpkgs.rev or "dirty";
+                  system.darwinVersionSuffix = nixpkgs.lib.mkForce ".${nixpkgsVersion { inherit nixpkgs patches; }}";
+                  system.darwinRevision = nixpkgs.lib.mkForce nixpkgs.rev or "dirty";
                 };
               })
               {
