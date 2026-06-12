@@ -1,0 +1,88 @@
+{
+  "nodes": {
+    "nix-darwin": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1749194393,
+        "narHash": "sha256-vt6hM9DNywnXXuW1qPDLzECmbDcmxhh58wpb0EEQjAo=",
+        "owner": "nix-darwin",
+        "repo": "nix-darwin",
+        "rev": "19346808c445f23b08652971be198b9df6c33edc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-darwin",
+        "repo": "nix-darwin",
+        "rev": "19346808c445f23b08652971be198b9df6c33edc",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1747728033,
+        "narHash": "sha256-NnXFQu7g4LnvPIPfJmBuZF7LFy/fey2g2+LCzjQhTUk=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "2f9173bde1d3fbf1ad26ff6d52f952f9e9da52ea",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-patch-git-review-bump": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-wAi/2QAQzyWRLCxgJShmNVqmTqc8GQ2CZVYYu5YTkBs=",
+        "type": "file",
+        "url": "https://github.com/NixOS/nixpkgs/pull/410328.diff?full_index=1"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://github.com/NixOS/nixpkgs/pull/410328.diff?full_index=1"
+      }
+    },
+    "nixpkgs-patcher": {
+      "locked": {
+        "path": "../..",
+        "type": "path"
+      },
+      "original": {
+        "path": "../..",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1749307940,
+        "narHash": "sha256-Zo1AH9079axOQpWqLiaUzbL+NT/k4lSCdCwZMvEvLv4=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "dd90a8666b501e6068a1d56fe6f0b1da85ccac06",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "dd90a8666b501e6068a1d56fe6f0b1da85ccac06",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nix-darwin": "nix-darwin",
+        "nixpkgs": "nixpkgs_2",
+        "nixpkgs-patch-git-review-bump": "nixpkgs-patch-git-review-bump",
+        "nixpkgs-patcher": "nixpkgs-patcher"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
