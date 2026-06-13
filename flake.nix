@@ -91,6 +91,8 @@
           selectSystem =
             systemAttrs: systemAttrs."${systemType}" or (die "${systemType} is an invalid system type.");
 
+          setNixpkgsFlakeSourceToPatched = config.setNixpkgsFlakeSourceToPatched or false;
+
           metadataModule =
             nixpkgs.lib.recursiveUpdate
               (selectSystem {
@@ -105,10 +107,7 @@
               })
               {
                 config = {
-                  # this should be using `finalNixpkgs` rather than `nixpkgs`
-                  # but that will slow down every command that tries to look up the nixpkgs flake
-                  # with the message 'copying "/nix/store/AAA..-patched" to the store'
-                  nixpkgs.flake.source = toString nixpkgs;
+                  nixpkgs.flake.source = toString (if setNixpkgsFlakeSourceToPatched then finalNixpkgs else nixpkgs);
                 };
               };
 

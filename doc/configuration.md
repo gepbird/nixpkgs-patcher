@@ -80,6 +80,29 @@ To disable this behaviour and make the build exit, you can do this:
 }
 ```
 
+### Pointing `nixpkgs.flake.source` to the Patched Nixpkgs
+
+By default, `nixpkgs.flake.source` points to the original/unpatched nixpkgs.
+This is to avoid long `copying "/nix/store/AAA..-patched" to the store` messages
+that would appear on every command that looks up the nixpkgs flake
+(e.g. `nix build nixpkgs#hello`).
+
+If you want `nixpkgs` to point at your patched nixpkgs source, you can do this:
+
+```nix
+# file: flake.nix
+{
+  outputs =
+    { nixpkgs-patcher, ... }@inputs:
+    {
+      nixosConfigurations.yourHostname = nixpkgs-patcher.lib.nixosSystem {
+        # ...
+        nixpkgsPatcher.setNixpkgsFlakeSourceToPatched = true; # default: false
+      };
+    };
+}
+```
+
 ### Using a Different System for Evaluation
 
 For example trying to query the hostname of an aarch64-linux host on an x86_64-linux machine would fail by default, but if you specify `nixpkgsPatcher.system` to be the current machine's system, it works:

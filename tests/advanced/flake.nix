@@ -50,6 +50,27 @@
         };
       };
 
+      nixosConfigurations.patchedWithFlakeSource = nixpkgs-patcher.lib.nixosSystem {
+        modules = [
+          ./configuration.nix
+          ./hardware-configuration.nix
+        ];
+        nixpkgsPatcher = {
+          inherit inputs;
+          nixpkgs = nixpkgs-unstable;
+          patchInputRegex = ".*nix-pr.*";
+          patches =
+            pkgs: with pkgs; [
+              (fetchurl {
+                name = "glance-environment-file.diff";
+                url = "https://github.com/gepbird/nixpkgs/commit/3bddd16a376b1e7360395ccc4ca1d702644513ce.diff?full_index=1";
+                hash = "sha256-6/lvpreEKP4HqalCBRhy9QrPGBV8g11czxDZ5mQmzww=";
+              })
+            ];
+          setNixpkgsFlakeSourceToPatched = true;
+        };
+      };
+
       nixosConfigurations.unpatched = nixpkgs-unstable.lib.nixosSystem {
         modules = [
           ./configuration.nix
@@ -59,7 +80,7 @@
 
       checks.x86_64-linux.tests =
         let
-          inherit (self.nixosConfigurations) patched unpatched;
+          inherit (self.nixosConfigurations) patched patchedWithFlakeSource unpatched;
           lib = import ../lib.nix { nixpkgs = nixpkgs-unstable; system = "x86_64-linux"; };
         in
         lib.runTests {
@@ -99,6 +120,14 @@
           };
           testPatchedVersionSuffix = {
             expr = builtins.match "^\\.[0-9]+\\.[0-9a-f]+-patched$" patched.config.system.nixos.versionSuffix != null;
+            expected = true;
+          };
+          testDefaultFlakeSourceIsUnpatched = {
+            expr = builtins.match "^.*-patched$" patched.config.nixpkgs.flake.source;
+            expected = null;
+          };
+          testSetNixpkgsFlakeSourceToPatchedPointsToPatched = {
+            expr = builtins.match "^.*-patched$" patchedWithFlakeSource.config.nixpkgs.flake.source != null;
             expected = true;
           };
         };
