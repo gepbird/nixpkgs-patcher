@@ -125,6 +125,29 @@
             {
               options.nixpkgs-patcher = {
                 enable = mkEnableOption "nixpkgs-patcher";
+                patchedNixpkgs = mkOption {
+                  type = types.path;
+                  default = finalNixpkgs;
+                  readOnly = true;
+                  description = ''
+                    The nixpkgs source this system was evaluated against, with
+                    all patches applied (equal to the unpatched nixpkgs when
+                    there are no patches).
+
+                    Exposed so you can reuse the exact same patched nixpkgs
+                    elsewhere in your configuration — for example as the target
+                    of a `nixpkgs=...` `NIX_PATH` entry, so legacy tooling
+                    resolves `<nixpkgs>` to the same source the system was built
+                    from:
+
+                    ```nix
+                    { config, ... }:
+                    {
+                      nix.nixPath = [ "nixpkgs=${config.nixpkgs-patcher.patchedNixpkgs}" ];
+                    }
+                    ```
+                  '';
+                };
                 settings = mkOption {
                   type = types.submodule {
                     options = {
