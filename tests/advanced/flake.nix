@@ -78,14 +78,43 @@
         ];
       };
 
+      # built through the patcher but with no patches, to exercise the path where
+      # patchedNixpkgs falls back to the unpatched base nixpkgs
+      nixosConfigurations.patchless = nixpkgs-patcher.lib.nixosSystem {
+        modules = [
+          ./configuration.nix
+          ./hardware-configuration.nix
+        ];
+        nixpkgsPatcher = {
+          inherit inputs;
+          nixpkgs = nixpkgs-unstable;
+          patchInputRegex = "^no-such-patch-input-.*";
+        };
+      };
+
       checks.x86_64-linux.tests =
         let
-          inherit (self.nixosConfigurations) patched patchedWithFlakeSource unpatched;
+          inherit (self.nixosConfigurations)
+            patched
+            patchedWithFlakeSource
+            unpatched
+            patchless
+            ;
           lib = import ../lib.nix { nixpkgs = nixpkgs-unstable; system = "x86_64-linux"; };
         in
         lib.runTests {
           testUnpatchedSystemBuilds = lib.testNixosConfigurationBuilds unpatched;
           testPatchedSystemBuilds = lib.testNixosConfigurationBuilds patched;
+          # with patches, patchedNixpkgs is the patched source, not the base input
+          testPatchedNixpkgsIsPatched = {
+            expr = (toString patched.config.nixpkgs-patcher.patchedNixpkgs) == (toString nixpkgs-unstable.outPath);
+            expected = false;
+          };
+          # without patches, patchedNixpkgs is exactly the base nixpkgs input
+          testPatchedNixpkgsIsBaseWhenNoPatches = {
+            expr = (toString patchless.config.nixpkgs-patcher.patchedNixpkgs) == (toString nixpkgs-unstable.outPath);
+            expected = true;
+          };
           testUnpatchedOsuVersion = {
             expr = unpatched.pkgs.osu-lazer-bin.version;
             expected = "2025.424.0";

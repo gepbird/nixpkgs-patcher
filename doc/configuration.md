@@ -130,3 +130,18 @@ For example trying to query the hostname of an aarch64-linux host on an x86_64-l
 ```
 
 This can be useful when using [nixpkgs-patcher with NixOS-DNS](https://github.com/gepbird/nixpkgs-patcher/issues/4).
+
+### Reusing the Patched nixpkgs
+
+You can obtain the patched nixpkgs instance by reading `config.nixpkgs-patcher.patchedNixpkgs`.
+
+This is handy when you want some other part of your configuration to use the exact same patched nixpkgs the system was built from, without calling `patchNixpkgs` a second time. A common case is pointing a `nixpkgs=...` `NIX_PATH` entry at it, so legacy tooling resolving `<nixpkgs>` sees the same source as your system:
+
+```nix
+# file: configuration.nix
+{ config, ... }:
+
+{
+  nix.nixPath = [ "nixpkgs=${config.nixpkgs-patcher.patchedNixpkgs}" ];
+}
+```
