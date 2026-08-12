@@ -195,13 +195,13 @@
           config = args.nixpkgsPatcher or { };
           inputs =
             config.inputs or args.specialArgs
-              or (die "Couldn't find your flake inputs. You need to pass the ${systemType} function an attrset with `nixpkgsPatcher.inputs = inputs` or `specialArgs = inputs`.");
+              or (die "Couldn't find your flake inputs. You need to pass the `lib.${systemType}` function an attrset with `nixpkgsPatcher.inputs = inputs` or `specialArgs = inputs`.");
           nixpkgs =
             config.nixpkgs or inputs.nixpkgs
-              or (die "Couldn't find your base nixpkgs. You need to pass the ${systemType} function an attrset with `nixpkgsPatcher.nixpkgs = inputs.nixpkgs` or name your main nixpkgs input `nixpkgs` and pass `specialArgs = inputs`.");
+              or (die "Couldn't find your base nixpkgs. You need to pass the `lib.${systemType}` function an attrset with `nixpkgsPatcher.nixpkgs = inputs.nixpkgs` or name your main nixpkgs input `nixpkgs` and pass `specialArgs = inputs`.");
           nix-darwin =
             config.nix-darwin or inputs.nix-darwin
-              or (die "Couldn't find your nix-darwin. You need to pass the ${systemType} function an attrset with `nixpkgsPatcher.nix-darwin = inputs.nix-darwin` or name your main nix-darwin input `nix-darwin` and pass `specialArgs = inputs`.");
+              or (die "Couldn't find your nix-darwin. You need to pass the `lib.${systemType}` function an attrset with `nixpkgsPatcher.nix-darwin = inputs.nix-darwin` or name your main nix-darwin input `nix-darwin` and pass `specialArgs = inputs`.");
           patchInputRegex = config.patchInputRegex or defaultPatchInputRegex;
           patchesFromConfig = config.patches or (_: [ ]);
 
