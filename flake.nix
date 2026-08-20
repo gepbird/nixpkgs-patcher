@@ -8,6 +8,27 @@
 
       defaultPatchInputRegex = "^nixpkgs-patch-.*";
 
+      isFlake = v: v._type or null == "flake";
+      isFlakeInputs = inputs: builtins.any isFlake (builtins.attrValues inputs);
+
+      requireFlakeInputs =
+        inputs: systemType:
+        if isFlakeInputs inputs then
+          inputs
+        else
+          die ''
+            Can't find flake inputs.
+            Please make sure you pass to lib.${systemType} an attrset with:
+
+                specialArgs = inputs;
+             or
+                specialArgs = inputs // { inherit inputs; };
+             or
+                nixpkgsPatcher.inputs = inputs;
+
+            See https://github.com/gepbird/nixpkgs-patcher/blob/main/doc/configuration.md#avoiding-specialargs-pollution.
+          '';
+
       patchesFromFlakeInputs =
         {
           inputs,
@@ -187,15 +208,13 @@
             ];
           }
           // nixpkgs.lib.optionalAttrs (systemType == "nixosSystem") { system = null; }
-          // builtins.removeAttrs args [
+          // removeAttrs args [
             "modules"
             "nixpkgsPatcher"
           ];
 
           config = args.nixpkgsPatcher or { };
-          inputs =
-            config.inputs or args.specialArgs
-              or (die "Couldn't find your flake inputs. You need to pass the `lib.${systemType}` function an attrset with `nixpkgsPatcher.inputs = inputs` or `specialArgs = inputs`.");
+          inputs = requireFlakeInputs (config.inputs or args.specialArgs) systemType;
           nixpkgs =
             config.nixpkgs or inputs.nixpkgs
               or (die "Couldn't find your base nixpkgs. You need to pass the `lib.${systemType}` function an attrset with `nixpkgsPatcher.nixpkgs = inputs.nixpkgs` or name your main nixpkgs input `nixpkgs` and pass `specialArgs = inputs`.");
