@@ -68,11 +68,41 @@
           enableTroubleshootingShell,
           pkgs,
         }:
-        pkgs.applyPatches {
+        # Deliberately not `pkgs.applyPatches`: its `installPhase` is
+        # `cp -R ./ $out`, so the tree is materialised twice -- once by
+        # `unpackPhase` into the build directory, then again into $out. On a
+        # nixpkgs-sized tree those two copies dominate everything else. Unpack
+        # straight into $out instead and promote the source root with renames,
+        # which stay within a single mount and are effectively free.
+        pkgs.stdenvNoCC.mkDerivation {
           name = "nixpkgs-${nixpkgsVersion { inherit nixpkgs patches; }}";
           src = nixpkgs;
 
           inherit patches;
+
+          preferLocalBuild = true;
+          allowSubstitutes = false;
+
+          phases = [
+            "unpackPhase"
+            "patchPhase"
+            "installPhase"
+          ];
+
+          preUnpack = ''
+            mkdir -p "$out/.nixpkgs-patcher-unpack"
+            cd "$out/.nixpkgs-patcher-unpack"
+          '';
+
+          installPhase = ''
+            shopt -s dotglob nullglob
+            entries=( "$PWD"/* )
+            cd "$out"
+            if (( ''${#entries[@]} )); then
+              mv -- "''${entries[@]}" "$out/"
+            fi
+            rm -rf -- "$out/.nixpkgs-patcher-unpack"
+          '';
 
           nativeBuildInputs =
             with pkgs;
