@@ -71,9 +71,7 @@
         # Deliberately not `pkgs.applyPatches`: its `installPhase` is
         # `cp -R ./ $out`, so the tree is materialised twice -- once by
         # `unpackPhase` into the build directory, then again into $out. On a
-        # nixpkgs-sized tree those two copies dominate everything else. Unpack
-        # straight into $out instead and promote the source root with renames,
-        # which stay within a single mount and are effectively free.
+        # nixpkgs-sized tree those two copies dominate everything else.
         pkgs.stdenvNoCC.mkDerivation {
           name = "nixpkgs-${nixpkgsVersion { inherit nixpkgs patches; }}";
           src = nixpkgs;
@@ -89,20 +87,37 @@
             "installPhase"
           ];
 
-          preUnpack = ''
-            mkdir -p "$out/.nixpkgs-patcher-unpack"
-            cd "$out/.nixpkgs-patcher-unpack"
+          # nixpkgs is ~54k files across ~38k directories, and copying it is by
+          # far the most expensive step. Copy straight into $out with one tar
+          # pipe per top-level entry -- and per `pkgs/*` entry, since `pkgs`
+          # dwarfs everything else and would otherwise leave one worker running
+          # long after the rest finish. A tar pipe overlaps reading and writing,
+          # which a single `cp` cannot. `--hard-dereference` keeps `cp -r`
+          # semantics: hardlinks introduced by store optimisation must not be
+          # reproduced into the build tree.
+          unpackPhase = ''
+            runHook preUnpack
+
+            mkdir -p "$out"
+            {
+              ls -A "$src" | grep -v '^pkgs$'
+              ls -A "$src/pkgs" 2>/dev/null | sed 's|^|pkgs/|'
+            } | xargs -P "$NIX_BUILD_CORES" -I@ sh -c '
+                if [ -d "$0/$1" ] && [ ! -L "$0/$1" ]; then
+                  mkdir -p "$2/$1"
+                  (cd "$0/$1" && tar --hard-dereference -cf - .) | (cd "$2/$1" && tar xf -)
+                else
+                  mkdir -p "$(dirname "$2/$1")"
+                  cp -a "$0/$1" "$2/$1"
+                fi' "$src" @ "$out"
+            chmod -R u+w "$out"
+            cd "$out"
+
+            runHook postUnpack
           '';
 
-          installPhase = ''
-            shopt -s dotglob nullglob
-            entries=( "$PWD"/* )
-            cd "$out"
-            if (( ''${#entries[@]} )); then
-              mv -- "''${entries[@]}" "$out/"
-            fi
-            rm -rf -- "$out/.nixpkgs-patcher-unpack"
-          '';
+          # unpackPhase already put the tree at its final location.
+          installPhase = "true";
 
           nativeBuildInputs =
             with pkgs;
