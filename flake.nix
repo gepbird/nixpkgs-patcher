@@ -195,7 +195,7 @@
           config = args.nixpkgsPatcher or { };
           inputs =
             let
-              maybeInputs = config.inputs or args.specialArgs;
+              maybeInputs = config.inputs or args.specialArgs or { };
               isFlake = v: v._type or null == "flake";
               isFlakeInputs = inputs: builtins.any isFlake (builtins.attrValues inputs);
             in
