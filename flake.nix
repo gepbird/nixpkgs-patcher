@@ -203,8 +203,8 @@
               maybeInputs
             else
               die ''
-                Can't find flake inputs.
-                Please make sure you pass to lib.${systemType} an attrset with:
+                Couldn't find your flake inputs.
+                You need to pass the `lib.${systemType}` function your flake inputs with either:
 
                     specialArgs = inputs;
                  or
